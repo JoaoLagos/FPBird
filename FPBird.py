@@ -1,19 +1,37 @@
 from PPlay.keyboard import *
 from PPlay.sprite import *
 from PPlay.window import *
+from PPlay.gameimage import *
 import random
 
-janela = Window(1280,720)
-janela.set_title("PF")
-teclado = Keyboard()
+cenario1 = "components/background/cidade.jpg"
+cenario2 = "components/background/bg2.jpg"
+cenario3 = "components/background/floresta.jpg"
+cenario = [cenario1, cenario2, cenario3]
+
 objetos = []
 vidas = []
 inimigos = []
 tiros = []
-passaro = Sprite("./coisas/imagens/Fly_1.png")
-fundo = Sprite("./coisas/imagens/cidade.jpg")
+
+#Janela
+janela = Window(1280,720)
+janela.set_title("PF")
+teclado = Keyboard()
+fundo =GameImage(cenario[random.randint(0,2)])
+
+#Sprites
+## Personagem
+passaro = Sprite("components/sprites/plane/Fly_1.png")
 passaro.x = 400
 passaro.y = janela.height/2 - passaro.height/2
+## Vidas
+for i in range(0,3):
+    vid = Sprite("components/sprites/vida/vida.png")
+    vid.x = vid.width *i
+    vidas.append(vid)
+
+#Variáveis
 vObstaculo = 300
 vPassaro = 400
 rload = 15
@@ -22,13 +40,9 @@ reloadDano = 0
 tiroReload = 15
 rSpawnInimigo = 0
 
-for i in range(0,3):
-    vid = Sprite("./coisas/imagens/vida.png")
-    vid.x = vid.width * i
-    vidas.append(vid)
+
 
 while True:
-    janela.set_background_color((0,0,0))
     fundo.draw()
     reloadDano -= 5 * janela.delta_time()
     rload += 9 * janela.delta_time()
@@ -45,21 +59,22 @@ while True:
 
     tiroReload += 10 * janela.delta_time()
     if teclado.key_pressed("space") and tiroReload >= 5:
-        tiro = Sprite("./coisas/imagens/Bullet_1.png")
-        tiro.y = passaro.y + passaro.height/2 - tiro.height/2
+        tiro = Sprite("components/sprites/bullet/Bullet_1.png")
+        tiro.y = passaro.y + passaro.height/2 - tiro.height/2 #tiro.y = passaro.y
         tiro.x = passaro.x + tiro.width
         tiros.append(tiro)
         tiroReload = 0
     if len(tiros) > 0:
         for t in tiros:
-            t.x += 500 * janela.delta_time()
+            t.x += 500 * janela.delta_time() #Velocidade dos tiros do personagem principal
             t.draw()
-            if t.x >= 1280:
+            if t.x >= 1280: 
                 tiros.remove(t)
 
     if rload > 10:
         posx = random.randint(1,10)
-        obj = Sprite("./coisas/imagens/bola.png")
+        #obj = Sprite("./coisas/imagens/bola.png")
+        obj = Sprite("components/sprites/bullet/Bullet_1.png")
         obj.x = janela.width
         obj.y = obj.height * posx
         objetos.append(obj)
@@ -77,7 +92,7 @@ while True:
                 objetos.remove(o)
 
     if rSpawnInimigo > 14 and len(inimigos) < 3:
-        inimigo = Sprite("./coisas/imagens/inimigo1.png")
+        inimigo = Sprite("components/sprites/inimigo/inimigo1.png")
         inimigo.x = janela.width
         inimigo.y = random.randint(1,5) * inimigo.height + 20
         inimigos.append(inimigo)
