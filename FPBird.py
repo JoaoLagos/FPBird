@@ -8,6 +8,7 @@ janela.set_title("PF")
 teclado = Keyboard()
 objetos = []
 vidas = []
+inimigos = []
 tiros = []
 passaro = Sprite("./coisas/imagens/Fly_1.png")
 fundo = Sprite("./coisas/imagens/cidade.jpg")
@@ -19,6 +20,7 @@ rload = 15
 click = 0
 reloadDano = 0
 tiroReload = 15
+rSpawnInimigo = 0
 
 for i in range(0,3):
     vid = Sprite("./coisas/imagens/vida.png")
@@ -30,6 +32,7 @@ while True:
     fundo.draw()
     reloadDano -= 5 * janela.delta_time()
     rload += 9 * janela.delta_time()
+    rSpawnInimigo += 9 * janela.delta_time()
 
     if teclado.key_pressed("w") and passaro.y > 0:
         passaro.y -= vPassaro * janela.delta_time()
@@ -72,6 +75,18 @@ while True:
             o.draw()
             if o.x <= - o.width:
                 objetos.remove(o)
+
+    if rSpawnInimigo > 14 and len(inimigos) < 3:
+        inimigo = Sprite("./coisas/imagens/inimigo1.png")
+        inimigo.x = janela.width
+        inimigo.y = random.randint(1,5) * inimigo.height + 20
+        inimigos.append(inimigo)
+        rSpawnInimigo = 0
+    if len(inimigos) > 0:
+        for ini in inimigos:
+            if ini.x > 1100:
+                ini.x -= 100 * janela.delta_time()
+            ini.draw()
 
     passaro.draw()
     for vida in vidas:
