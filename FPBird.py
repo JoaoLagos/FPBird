@@ -66,6 +66,7 @@ while True:
         for o in objetos:
             if passaro.collided(o) and reloadDano < 0 and len(vidas) != 0:
                 vidas.remove(vidas[len(vidas) - 1])
+                objetos.remove(o)
                 reloadDano = 5
             o.x -= vObstaculo * janela.delta_time()
             o.draw()
