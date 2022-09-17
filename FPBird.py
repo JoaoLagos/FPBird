@@ -39,6 +39,7 @@ click = 0
 reloadDano = 0
 tiroReload = 15
 rSpawnInimigo = 0
+pontos = 0
 
 
 
@@ -59,7 +60,7 @@ while True:
 
     tiroReload += 10 * janela.delta_time()
     if teclado.key_pressed("space") and tiroReload >= 5:
-        tiro = Sprite("components/sprites/bullet/Bullet_1.png")
+        tiro = Sprite("components/sprites/bullet/Bullet_1_1.png")
         tiro.y = passaro.y + passaro.height/2 - tiro.height/2 #tiro.y = passaro.y
         tiro.x = passaro.x + tiro.width
         tiros.append(tiro)
@@ -72,11 +73,11 @@ while True:
                 tiros.remove(t)
 
     if rload > 10:
-        posx = random.randint(1,10)
+        #posx = random.randint(1,50) # Pode ser retirado com o uso do random no obj.y
         #obj = Sprite("./coisas/imagens/bola.png")
-        obj = Sprite("components/sprites/bullet/Bullet_1.png")
+        obj = Sprite("components/sprites/bullet/Bullet_1_1.png") 
         obj.x = janela.width
-        obj.y = obj.height * posx
+        obj.y = random.randint(0, janela.height-obj.height) #obj.height * posx # ??? obj.height: se diminuir o obj fica limitado a uma certa altura ??? posx: e não posy
         objetos.append(obj)
         rload = 0
 
@@ -101,9 +102,16 @@ while True:
         for ini in inimigos:
             if ini.x > 1100:
                 ini.x -= 100 * janela.delta_time()
+            for tiro in tiros: #Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
+                if ini.collided(tiro):
+                    inimigos.remove(ini)
+                    tiros.remove(tiro)
+                    pontos += 1  
             ini.draw()
 
     passaro.draw()
     for vida in vidas:
         vida.draw()
+
+    janela.draw_text(str(pontos),20,20,size=40,bold=True)
     janela.update()
