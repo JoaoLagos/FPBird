@@ -21,6 +21,7 @@ def gameplay():
     objetos = []
     vidas = []
     inimigos = []
+    vely_inimigos = []
     tiros = []
     inimigosAbatidos = []
 
@@ -43,9 +44,11 @@ def gameplay():
     reloadDano = 0
     tiroReload = 15
     rSpawnInimigo = 0
+    vely_ini = -100
     pontos = 0
 
 # Gameloop
+    ## Enquanto houver vida. len(vidas) > 0
     while len(vidas) > 0:
 
         rNuvem += 3 * janela.delta_time()
@@ -133,21 +136,35 @@ def gameplay():
         if rSpawnInimigo > 14 and len(inimigos) < 3:
             inimigo = Sprite("components/sprites/inimigo/inimigo1.png")
             inimigo.x = janela.width
-            inimigo.y = random.randint(1, 5) * inimigo.height + 20
+            inimigo.y = random.randint(0, janela.height-inimigo.height)
+
             inimigos.append(inimigo)
             rSpawnInimigo = 0
 
         ## Movimento Inimigos e Verificação de colisão com os tiros
         if len(inimigos) > 0:
             for ini in inimigos:
+                tag = inimigos.index(ini) # Foi necessário buscar a posição na lista para associar a sua vely (individualmente). Depois talvez possa melhorar
+                vely_inimigos.append(vely_ini)
+                
+                ### Movimento dos inimigos eixo X (entrada na tela)
                 if ini.x > 1100:
                     ini.x -= 100 * janela.delta_time()
+
+                ### Movimento dos inimigos no eixo Y
+                if inimigos[tag].y <= 0:
+                    vely_inimigos[tag] = abs(vely_inimigos[tag])
+                elif ini.y >= janela.height - ini.height:
+                    vely_inimigos[tag] = -vely_inimigos[tag]
+
+                inimigos[tag].y += vely_inimigos[tag]*janela.delta_time()
+
                 for tiro in tiros:  # Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
                     if ini.collided(tiro):
                         auxX = ini.x
                         auxY = ini.y
                         inimigos.remove(ini)
-                        DIni = Sprite("components/sprites/inimigo/Dead_inimigo_1.png")
+                        DIni = Sprite("components/sprites/inimigo/Dead_inimigo_2.png") # Para criar um sprite DEAD no lugar do inimigo abatido
                         DIni.x = auxX
                         DIni.y = auxY
                         inimigosAbatidos.append(DIni)
@@ -156,6 +173,7 @@ def gameplay():
                         pontos += 1
                 ini.draw()
 
+        ## Faz a queda do inimigo abatido
         if len(inimigosAbatidos) > 0:
             for deadIni in inimigosAbatidos:
                 if deadIni.x >= 1000:
@@ -172,33 +190,71 @@ def gameplay():
 
         janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
 
+        # Se não houver mais vidas, limpa tela
         if len(vidas) == 0:
             janela.clear()
-
+ 
         janela.update()
-    gameOver = Sprite("components/sprites/game_over.png")
+
+    ## Quando a vida zerar. len(vidas) == 0
+    gameOver = Sprite("components/sprites/gameover/gameover_2.png") 
     gameOver.x = janela.width/2 - gameOver.width/2
     gameOver.y = janela.height/2 - gameOver.height/2
-    while True:
-        playerX = passaro.x
-        playery = passaro.y
-        passaro = Sprite("components/sprites/plane/Dead_1.png")
-        passaro.x = playerX
-        passaro.y = playery
-
+    playerX = passaro.x
+    playery = passaro.y
+    passaro = Sprite("components/sprites/plane/Dead_2.png")
+    passaro.x = playerX
+    passaro.y = playery
+    while len(vidas)==0:
         fundo.draw()
         fundo2.draw()
-        passaro.draw()
-        for nuv in nuvems:
-            nuv.draw()
-        for ini in inimigos:
-            ini.draw()
-        for tiro in tiros:
-            tiro.draw()
-        for obj in objetos:
-            obj.draw()
+        # Enquanto tiver elementos passando na tela
+        while len(nuvems)!=0 or len(inimigos)!=0 or len(tiros)!=0 or len(objetos)!=0:
+
+            ## Queda do avião
+            passaro.y += 400*janela.delta_time()
+
+            ## Rolagem do Fundo
+            fundo.x -= 200 * janela.delta_time()
+            fundo2.x -= 200 * janela.delta_time()
+            if fundo.x <= 0 - fundo.width:
+                fundo.x = janela.width
+            if fundo2.x <= 0 - fundo2.width:
+                fundo2.x = janela.width
+
+            fundo.draw()
+            fundo2.draw()
+            passaro.draw()
+
+            ## Rolagem dos Elementos
+            for nuv in nuvems:
+                nuv.x -= 600 * janela.delta_time() #300
+                if nuv.x < 0 - nuv.width:
+                    nuvems.remove(nuv)
+                nuv.draw()
+            for ini in inimigos:
+                ini.x -= 300 * janela.delta_time() 
+                if ini.x < 0 - ini.width:
+                    inimigos.remove(ini)
+                ini.draw()
+            for tiro in tiros:
+                tiro.x -= 800*janela.delta_time() #200
+                if tiro.x < 0 - tiro.width:
+                    tiros.remove(tiro)
+                tiro.draw()
+            for obj in objetos:
+                obj.x += 500*janela.delta_time() #200
+                if obj.x > janela.width + obj.width:
+                    objetos.remove(obj)
+                obj.draw()
+            
+            gameOver.draw()
+            janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
+            janela.update()
+
         gameOver.draw()
-        janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
+        janela.draw_text(f"PONTUAÇÃO: {pontos}", gameOver.x+140, gameOver.y-40, size=40, bold=True,color=(245,220,0))
+        janela.draw_text("Pressione ESC para Recomeçar",gameOver.x,gameOver.y+gameOver.height,size=40,bold=True,color=(245,220,0))
         janela.update()
         if teclado.key_pressed("esc"):
             return 0
