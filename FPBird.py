@@ -1,8 +1,79 @@
+from this import d
+from PPlay import sprite
 from PPlay.keyboard import *
 from PPlay.sprite import *
 from PPlay.window import *
 from PPlay.gameimage import *
 import random
+
+def menu_principal():
+    #Sprites
+    ## Avião
+    aviao = Sprite("components/sprites/plane/Fly_1.png")
+    aviao.x = janela.width/2 - aviao.width/2
+    aviao.y = janela.height/2 - aviao.height/2
+
+    ## Fundo e Fundo2
+    fundo = GameImage("components/background/bg2_colinas.jpg")
+    fundo2 = GameImage("components/background/bg2_colinas_Inverso.jpg")
+    fundo2.x = janela.width
+
+    ## Logo
+    logo = Sprite("components/menu/logo1.png")
+    logo.x = janela.width/2 - logo.width/2
+    logo.y = 100
+
+    ## Botões
+    ### Botão Jogar
+    botao_jogar = Sprite("components/menu/botao_jogar.png")
+    botao_jogar.x= janela.width/2 - botao_jogar.width/2
+    botao_jogar.y = 300
+    ### Botão Dificuldade (Nível)
+    botao_dificuldade = Sprite("components/menu/botao_dificuldade.png")
+    botao_dificuldade.x = janela.width/2 - botao_dificuldade.width/2
+    botao_dificuldade.y = botao_jogar.y + botao_jogar.height + 20
+    ### Botão Sair
+    botao_sair = Sprite("components/menu/botao_sair.png")
+    botao_sair.x = janela.width/2 - botao_sair.width/2
+    botao_sair.y = botao_dificuldade.y + botao_dificuldade.height + 20
+    
+    rNuvem = 7
+    nuvems = []
+    while True:
+        # Movimentação Fundo
+        fundo.x -= 50 * janela.delta_time()
+        fundo2.x -= 50 * janela.delta_time()
+        if fundo.x <= 0 - fundo.width:
+            fundo.x = janela.width
+        if fundo2.x <= 0 - fundo2.width:
+            fundo2.x = janela.width
+        
+        fundo.draw()
+        fundo2.draw()
+        logo.draw()
+        
+        # Criação de Nuvens
+        rNuvem += 2 * janela.delta_time()
+        if rNuvem >= 7:
+            rNuvem = 0
+            nuvem = Sprite("components/background/nuvem.png")
+            nuvem.x = janela.width
+            nuvem.y = 100 * random.randint(0, 11)
+            nuvems.append(nuvem)
+        if len(nuvems) > 0:
+            for nuv in nuvems:
+                nuv.x -= 200 * janela.delta_time()
+                if nuv.x < 0 - nuv.width:
+                    nuvems.remove(nuv)
+                nuv.draw()
+        
+        botao_jogar.draw()
+        botao_dificuldade.draw()
+        botao_sair.draw()
+        
+        janela.update()
+        if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1):
+            return 1
 
 def gameplay():
     cenario1 = "components/background/bg1_cidade.jpg"
@@ -259,7 +330,7 @@ def gameplay():
         if teclado.key_pressed("esc"):
             return 0
 
-def menu():
+def menu_jogo():
     aviao = Sprite("components/sprites/plane/Fly_1.png")
     aviao.x = janela.width/2 - aviao.width/2
     aviao.y = janela.height/2 - aviao.height/2
@@ -308,16 +379,24 @@ def menu():
             return 1
 
 # Inicio
-
+menu = 0
 tela = 0
 
 # Janela
 janela = Window(1280, 720)
 janela.set_title("PF")
 teclado = Keyboard()
+mouse_cursor = Window.get_mouse()
 
 while True:
-    if tela == 0:
-        tela = menu()
-    elif tela == 1:
-        tela = gameplay()
+    
+    if menu == 0:
+        menu = menu_principal()
+
+    elif menu == 1:
+        if tela == 0:
+            tela = menu_jogo()
+
+        elif tela == 1:
+            tela = gameplay()
+            menu = tela
