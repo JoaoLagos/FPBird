@@ -7,6 +7,7 @@ from PPlay.gameimage import *
 import random
 
 def menu_principal():
+    global rMouse
     #Sprites
     ## Avião
     aviao = Sprite("components/sprites/plane/Fly_1.png")
@@ -72,15 +73,36 @@ def menu_principal():
         botao_sair.draw()
         
         janela.update()
-        if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1):
+
+        if rMouse>0:
+            rMouse -= 10*janela.delta_time()
+        # Seleção das opções
+        if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            rMouse = 5
             return 1
+        
+        if mouse_cursor.is_over_object(botao_dificuldade) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            rMouse = 5
+            return 2
+        if mouse_cursor.is_over_object(botao_sair) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            janela.close()
 
 def gameplay():
+# Cenários
     cenario1 = "components/background/bg1_cidade.jpg"
     cenario2 = "components/background/bg2_colinas.jpg"
     cenario3 = "components/background/bg3_floresta.jpg"
-    cenarios = [cenario1, cenario2, cenario3]
-    cenario = cenarios[random.randint(0, 2)]
+    cenario4 = "components/background/bg4_rural.jpg"
+    cenario5 = "components/background/bg5_eolica.jpg"
+    cenario6 = "components/background/bg6_interior.jpg"
+    cenario7 = "components/background/bg7_municipio.jpg"
+    cenario8 = "components/background/bg8_rio.jpg"
+    cenario9 = "components/background/bg9_colinas_neve.jpg"
+    cenario10 = "components/background/bg10_totem.jpg"
+    cenario11 = "components/background/bg11_praia.jpg"
+    cenario12 = "components/background/bg12_praia_2.jpg"
+    cenarios = [cenario1, cenario2, cenario3, cenario4, cenario5, cenario6, cenario7, cenario8, cenario9, cenario10, cenario11, cenario12]
+    cenario = cenarios[random.randint(0, len(cenarios)-1)]
     fundo = GameImage(cenario)
     fundo2 = GameImage(str(cenario).strip(".jpg")+"_Inverso.jpg")
     fundo2.x = janela.width
@@ -331,19 +353,25 @@ def gameplay():
             return 0
 
 def menu_jogo():
+
     aviao = Sprite("components/sprites/plane/Fly_1.png")
     aviao.x = janela.width/2 - aviao.width/2
     aviao.y = janela.height/2 - aviao.height/2
+
     fundo = GameImage("components/background/bg2_colinas.jpg")
     fundo2 = GameImage("components/background/bg2_colinas_Inverso.jpg")
+    fundo2.x = janela.width
+
     txt = Sprite("components/background/Texto.png")
     txt.x = janela.width/2 - txt.width/2
     txt.y = janela.height/4 - txt.height/2
-    fundo2.x = janela.width
+    
     vMenu = 70
     rNuvem = 7
     nuvems = []
+
     while True:
+        # Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
         fundo2.x -= 50 * janela.delta_time()
         if fundo.x <= 0 - fundo.width:
@@ -351,6 +379,7 @@ def menu_jogo():
         if fundo2.x <= 0 - fundo2.width:
             fundo2.x = janela.width
 
+        #Movimentação Avião
         if aviao.y >= janela.height/2 + 70:
             vMenu = - abs(vMenu)
         if aviao.y <= janela.height/2 - 70:
@@ -360,6 +389,8 @@ def menu_jogo():
         fundo.draw()
         fundo2.draw()
         aviao.draw()
+
+        # Criação das nuvens
         rNuvem += 2 * janela.delta_time()
         if rNuvem >= 7:
             rNuvem = 0
@@ -376,11 +407,71 @@ def menu_jogo():
         txt.draw()
         janela.update()
         if teclado.key_pressed("enter"):
-            return 1
+            return 1  
+
+def dificuldade():
+    global nivel # Pega por referência a variável nível para ser modificada dentro e fora da função
+    global rMouse
+    fundo = GameImage("components/background/bg2_colinas.jpg")
+
+    # Botões
+    ## Texto Dificuldade
+    txt_dificuldade = Sprite("components/menu/dificuldade/dificuldade.png", 1)
+    txt_dificuldade.x = janela.width/2 - txt_dificuldade.width/2
+    txt_dificuldade.y = 20
+
+    ## Fácil
+    facil = Sprite("components/menu/dificuldade/facil.png", 1)
+    facil.x = janela.width/2 - facil.width/2
+    facil.y = 200
+
+    ## Médio
+    medio = Sprite("components/menu/dificuldade/medio.png", 1)
+    medio.x = janela.width/2 - medio.width/2
+    medio.y = facil.y + facil.height + 20
+
+    ## Dificil
+    dificil = Sprite("components/menu/dificuldade/dificil.png", 1)
+    dificil.x = janela.width/2 - dificil.width/2
+    dificil.y = medio.y + medio.height + 20
+
+    ## Voltar
+    voltar = Sprite("components/menu/dificuldade/voltar2.png", 1)
+    voltar.x = 40
+    voltar.y = janela.height - voltar.height - 20
+
+    while True:
+        if rMouse>0:
+            rMouse -= 10*janela.delta_time()
+
+        if mouse_cursor.is_over_object(facil) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            nivel = 1
+            rMouse = 5
+            return 0
+        if mouse_cursor.is_over_object(medio) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            nivel = 2
+            rMouse = 5
+            return 0
+        if mouse_cursor.is_over_object(dificil) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            nivel = 3
+            rMouse = 5
+            return 0
+        if mouse_cursor.is_over_object(voltar) and mouse_cursor.is_button_pressed(1) and rMouse<=0:
+            return 0
+
+        fundo.draw()
+        txt_dificuldade.draw()
+        facil.draw()
+        medio.draw()
+        dificil.draw()
+        voltar.draw()
+        janela.update()
 
 # Inicio
 menu = 0
 tela = 0
+nivel = 1
+rMouse = 0
 
 # Janela
 janela = Window(1280, 720)
@@ -400,3 +491,6 @@ while True:
         elif tela == 1:
             tela = gameplay()
             menu = tela
+
+    elif menu == 2:
+        menu = dificuldade()
