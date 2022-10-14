@@ -164,7 +164,7 @@ def gameplay():
         # Entradas
         if teclado.key_pressed("w") and passaro.y > 0:
             passaro.y -= vPassaro * janela.delta_time()
-        if teclado.key_pressed("s") and passaro.y < 720:
+        if teclado.key_pressed("s") and passaro.y and passaro.height < 720:
             passaro.y += vPassaro * janela.delta_time()
         if teclado.key_pressed("d") and passaro.x < janela.width / 2:
             passaro.x += vPassaro * janela.delta_time()
