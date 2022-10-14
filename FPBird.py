@@ -7,32 +7,38 @@ import random
 
 def menu_principal():
     global rMouse
+
+    pygame.mixer.music.load("components/audio/menu_principal.mp3")
+    pygame.mixer.music.play()
+    
+
+
     # Sprites
-    ## Avião
+    # Avião
     aviao = Sprite("components/sprites/plane/Fly_1.png")
     aviao.x = janela.width / 2 - aviao.width / 2
     aviao.y = janela.height / 2 - aviao.height / 2
 
-    ## Fundo e Fundo2
+    # Fundo e Fundo2
     fundo = GameImage("components/background/bg2_colinas.jpg")
     fundo2 = GameImage("components/background/bg2_colinas_Inverso.jpg")
     fundo2.x = janela.width
 
-    ## Logo
+    # Logo
     logo = Sprite("components/menu/logo1.png")
     logo.x = janela.width / 2 - logo.width / 2
     logo.y = 100
 
-    ## Botões
-    ### Botão Jogar
+    # Botões
+    # Botão Jogar
     botao_jogar = Sprite("components/menu/botao_jogar.png")
     botao_jogar.x = janela.width / 2 - botao_jogar.width / 2
     botao_jogar.y = 300
-    ### Botão Dificuldade (Nível)
+    # Botão Dificuldade (Nível)
     botao_dificuldade = Sprite("components/menu/botao_dificuldade.png")
     botao_dificuldade.x = janela.width / 2 - botao_dificuldade.width / 2
     botao_dificuldade.y = botao_jogar.y + botao_jogar.height + 20
-    ### Botão Sair
+    # Botão Sair
     botao_sair = Sprite("components/menu/botao_sair.png")
     botao_sair.x = janela.width / 2 - botao_sair.width / 2
     botao_sair.y = botao_dificuldade.y + botao_dificuldade.height + 20
@@ -78,6 +84,7 @@ def menu_principal():
         # Seleção das opções
         if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
             rMouse = 5
+            pygame.mixer.music.unload()
             return 1
 
         if mouse_cursor.is_over_object(botao_dificuldade) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
@@ -119,11 +126,11 @@ def gameplay():
     inimigosAbatidos = []
 
     # Sprites
-    ## Personagem
+    # Personagem
     passaro = Sprite("components/sprites/plane/Fly_1.png")
     passaro.x = 400
     passaro.y = janela.height / 2 - passaro.height / 2
-    ## Vidas
+    # Vidas
     for i in range(0, 3):
         vid = Sprite("components/sprites/vida/vida.png")
         vid.x = vid.width * i
@@ -141,13 +148,13 @@ def gameplay():
     vely_ini = -100
     pontos = 0
 
-    #FPS
+    # FPS
     tempo = 0
     FPS = 0
     frames = 0
 
     # Gameloop
-    ## Enquanto houver vida. len(vidas) > 0
+    # Enquanto houver vida. len(vidas) > 0
     while len(vidas) > 0:
         tempo += janela.delta_time()
         frames += 1
@@ -198,9 +205,11 @@ def gameplay():
                 nuv.draw()
         #########################
 
-        ## Entrada dos tiros e sua movimentação
+        # Entrada dos tiros e sua movimentação
         tiroReload += 10 * janela.delta_time()
         if teclado.key_pressed("space") and tiroReload >= 5:
+            somTiro = pygame.mixer.Sound("components/audio/tiro.wav")
+            somTiro.play()
             tiro = Sprite("components/sprites/bullet/Bullet_1.png")
             tiro.y = passaro.y + passaro.height / 2 - tiro.height / 2  # tiro.y = passaro.y
             tiro.x = passaro.x + tiro.width
@@ -214,7 +223,7 @@ def gameplay():
                     tiros.remove(t)
 
         # Projéteis Inimigos
-        ## Cria
+        # Cria
         if rload > 10:
             # posx = random.randint(1,50) # Pode ser retirado com o uso do random no obj.y
             # obj = Sprite("./coisas/imagens/bola.png")
@@ -224,10 +233,12 @@ def gameplay():
                                    janela.height - obj.height)  # obj.height * posx # ??? obj.height: se diminuir o obj fica limitado a uma certa altura ??? posx: e não posy
             objetos.append(obj)
             rload = 0
-        ## Verifica colisão e remove
+        # Verifica colisão e remove
         else:
             for o in objetos:
                 if passaro.collided(o) and reloadDano < 0 and len(vidas) != 0:
+                    somCrash1 = pygame.mixer.Sound("components/audio/crash.wav")
+                    somCrash1.play()
                     vidas.remove(vidas[len(vidas) - 1])
                     objetos.remove(o)
                     reloadDano = 5
@@ -237,7 +248,7 @@ def gameplay():
                     objetos.remove(o)
 
         # Inimigos
-        ## Spawn Inimigos
+        # Spawn Inimigos
         if rSpawnInimigo > 14 and len(inimigos) < 3:
             inimigo = Sprite("components/sprites/inimigo/inimigo1.png")
             inimigo.x = janela.width
@@ -246,18 +257,18 @@ def gameplay():
             inimigos.append(inimigo)
             rSpawnInimigo = 0
 
-        ## Movimento Inimigos e Verificação de colisão com os tiros
+        # Movimento Inimigos e Verificação de colisão com os tiros
         if len(inimigos) > 0:
             for ini in inimigos:
                 tag = inimigos.index(
                     ini)  # Foi necessário buscar a posição na lista para associar a sua vely (individualmente). Depois talvez possa melhorar
                 vely_inimigos.append(vely_ini)
 
-                ### Movimento dos inimigos eixo X (entrada na tela)
+                # Movimento dos inimigos eixo X (entrada na tela)
                 if ini.x > 1100:
                     ini.x -= 100 * janela.delta_time()
 
-                ### Movimento dos inimigos no eixo Y
+                # Movimento dos inimigos no eixo Y
                 if inimigos[tag].y <= 0:
                     vely_inimigos[tag] = abs(vely_inimigos[tag])
                 elif ini.y >= janela.height - ini.height:
@@ -267,6 +278,8 @@ def gameplay():
 
                 for tiro in tiros:  # Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
                     if ini.collided(tiro):
+                        somCrash2 = pygame.mixer.Sound("components/audio/crash.wav")
+                        somCrash2.play()
                         auxX = ini.x
                         auxY = ini.y
                         inimigos.remove(ini)
@@ -282,7 +295,7 @@ def gameplay():
                             vObstaculo += 20
                 ini.draw()
 
-        ## Faz a queda do inimigo abatido
+        # Faz a queda do inimigo abatido
         if len(inimigosAbatidos) > 0:
             for deadIni in inimigosAbatidos:
                 if deadIni.x >= 1000:
@@ -298,7 +311,10 @@ def gameplay():
             vida.draw()
 
         janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
-        janela.draw_text("FPS: {}".format(FPS), 10, 60, size=30, bold=True, color=(245, 220, 0))
+
+        if pygame.key.get_pressed()[pygame.K_F5]:
+            janela.draw_text("FPS: {}".format(FPS), janela.width -
+                             100, 0, size=16, bold=True, color=(0, 235, 12))
 
         # Se não houver mais vidas, limpa tela
         if len(vidas) == 0:
@@ -306,7 +322,7 @@ def gameplay():
 
         janela.update()
 
-    ## Quando a vida zerar. len(vidas) == 0
+    # Quando a vida zerar. len(vidas) == 0
     gameOver = Sprite("components/sprites/gameover/gameover_2.png")
     gameOver.x = janela.width / 2 - gameOver.width / 2
     gameOver.y = janela.height / 2 - gameOver.height / 2
@@ -318,13 +334,17 @@ def gameplay():
     while len(vidas) == 0:
         fundo.draw()
         fundo2.draw()
+        pygame.mixer.music.load("components/audio/gameover.wav")
+        pygame.mixer.music.play()
+        if not pygame.mixer.music.get_busy:
+            pygame.mixer.music.unload()
         # Enquanto tiver elementos passando na tela
         while len(nuvems) != 0 or len(inimigos) != 0 or len(tiros) != 0 or len(objetos) != 0:
 
-            ## Queda do avião
+            # Queda do avião
             passaro.y += 400 * janela.delta_time()
 
-            ## Rolagem do Fundo
+            # Rolagem do Fundo
             fundo.x -= 200 * janela.delta_time()
             fundo2.x -= 200 * janela.delta_time()
             if fundo.x <= 0 - fundo.width:
@@ -336,7 +356,7 @@ def gameplay():
             fundo2.draw()
             passaro.draw()
 
-            ## Rolagem dos Elementos
+            # Rolagem dos Elementos
             for nuv in nuvems:
                 nuv.x -= 600 * janela.delta_time()  # 300
                 if nuv.x < 0 - nuv.width:
@@ -359,12 +379,13 @@ def gameplay():
                 obj.draw()
 
             gameOver.draw()
-            janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
             janela.update()
 
         gameOver.draw()
-        janela.draw_text("PONTUAÇÃO: {}".format(pontos), gameOver.x + 140, gameOver.y - 40, size=40, bold=True,color=(245, 220, 0))
-        janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y + gameOver.height, size=40, bold=True,color=(245, 220, 0))
+        janela.draw_text("PONTUAÇÃO: {}".format(pontos), gameOver.x +
+                         140, gameOver.y - 40, size=40, bold=True, color=(245, 220, 0))
+        janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y +
+                         gameOver.height, size=40, bold=True, color=(245, 220, 0))
         janela.update()
         if teclado.key_pressed("esc"):
             return 0
@@ -433,27 +454,27 @@ def dificuldade():
     fundo = GameImage("components/background/bg2_colinas.jpg")
 
     # Botões
-    ## Texto Dificuldade
+    # Texto Dificuldade
     txt_dificuldade = Sprite("components/menu/dificuldade/dificuldade.png", 1)
     txt_dificuldade.x = janela.width / 2 - txt_dificuldade.width / 2
     txt_dificuldade.y = 20
 
-    ## Fácil
+    # Fácil
     facil = Sprite("components/menu/dificuldade/facil.png", 1)
     facil.x = janela.width / 2 - facil.width / 2
     facil.y = 200
 
-    ## Médio
+    # Médio
     medio = Sprite("components/menu/dificuldade/medio.png", 1)
     medio.x = janela.width / 2 - medio.width / 2
     medio.y = facil.y + facil.height + 20
 
-    ## Dificil
+    # Dificil
     dificil = Sprite("components/menu/dificuldade/dificil.png", 1)
     dificil.x = janela.width / 2 - dificil.width / 2
     dificil.y = medio.y + medio.height + 20
 
-    ## Voltar
+    # Voltar
     voltar = Sprite("components/menu/dificuldade/voltar2.png", 1)
     voltar.x = 40
     voltar.y = janela.height - voltar.height - 20
