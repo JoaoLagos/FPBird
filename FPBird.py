@@ -141,9 +141,21 @@ def gameplay():
     vely_ini = -100
     pontos = 0
 
+    #FPS
+    tempo = 0
+    FPS = 0
+    frames = 0
+
     # Gameloop
     ## Enquanto houver vida. len(vidas) > 0
     while len(vidas) > 0:
+        tempo += janela.delta_time()
+        frames += 1
+        if tempo >= 1:
+            FPS = frames
+            frames = 0
+            tempo = 0
+
         if teclado.key_pressed("esc"):
             return 0
         rNuvem += 3 * janela.delta_time()
@@ -286,6 +298,7 @@ def gameplay():
             vida.draw()
 
         janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
+        janela.draw_text("FPS: {}".format(FPS), 10, 60, size=30, bold=True, color=(245, 220, 0))
 
         # Se não houver mais vidas, limpa tela
         if len(vidas) == 0:
@@ -350,10 +363,8 @@ def gameplay():
             janela.update()
 
         gameOver.draw()
-        janela.draw_text(f"PONTUAÇÃO: {pontos}", gameOver.x + 140, gameOver.y - 40, size=40, bold=True,
-                         color=(245, 220, 0))
-        janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y + gameOver.height, size=40, bold=True,
-                         color=(245, 220, 0))
+        janela.draw_text("PONTUAÇÃO: {}".format(pontos), gameOver.x + 140, gameOver.y - 40, size=40, bold=True,color=(245, 220, 0))
+        janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y + gameOver.height, size=40, bold=True,color=(245, 220, 0))
         janela.update()
         if teclado.key_pressed("esc"):
             return 0
