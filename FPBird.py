@@ -2,20 +2,21 @@ from PPlay.keyboard import *
 from PPlay.sprite import *
 from PPlay.window import *
 from PPlay.gameimage import *
+from PPlay.animation import *
 import random
 
 
 def menu_principal():
     global rMouse
 
+    # Música Menu Principal
     pygame.mixer.music.load("components/audio/menu_principal.mp3")
     pygame.mixer.music.play()
-    
-
 
     # Sprites
     # Avião
-    aviao = Sprite("components/sprites/plane/Fly_1.png")
+    aviao = Sprite("components/sprites/plane/FlyAnimation.png", 2)
+    aviao.set_total_duration(10)
     aviao.x = janela.width / 2 - aviao.width / 2
     aviao.y = janela.height / 2 - aviao.height / 2
 
@@ -79,7 +80,7 @@ def menu_principal():
 
         janela.update()
 
-        if rMouse > 0:
+        if rMouse > 0: # Recarregamento do clique, pois senão ele pode dar double click.
             rMouse -= 10 * janela.delta_time()
         # Seleção das opções
         if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
@@ -127,7 +128,9 @@ def gameplay():
 
     # Sprites
     # Personagem
-    passaro = Sprite("components/sprites/plane/Fly_1.png")
+    passaro = Sprite("components/sprites/plane/FlyAnimation.png", 2)
+    passaro.set_total_duration(10)
+    
     passaro.x = 400
     passaro.y = janela.height / 2 - passaro.height / 2
     # Vidas
@@ -237,7 +240,8 @@ def gameplay():
         else:
             for o in objetos:
                 if passaro.collided(o) and reloadDano < 0 and len(vidas) != 0:
-                    somCrash1 = pygame.mixer.Sound("components/audio/crash.wav")
+                    somCrash1 = pygame.mixer.Sound(
+                        "components/audio/crash.wav")
                     somCrash1.play()
                     vidas.remove(vidas[len(vidas) - 1])
                     objetos.remove(o)
@@ -250,7 +254,8 @@ def gameplay():
         # Inimigos
         # Spawn Inimigos
         if rSpawnInimigo > 14 and len(inimigos) < 3:
-            inimigo = Sprite("components/sprites/inimigo/inimigo1.png")
+            inimigo = Sprite("components/sprites/inimigo/inimigoAnimation.png", 2)
+            inimigo.set_total_duration(10)
             inimigo.x = janela.width
             inimigo.y = random.randint(0, janela.height - inimigo.height)
 
@@ -278,7 +283,8 @@ def gameplay():
 
                 for tiro in tiros:  # Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
                     if ini.collided(tiro):
-                        somCrash2 = pygame.mixer.Sound("components/audio/crash.wav")
+                        somCrash2 = pygame.mixer.Sound(
+                            "components/audio/crash.wav")
                         somCrash2.play()
                         auxX = ini.x
                         auxY = ini.y
@@ -294,7 +300,7 @@ def gameplay():
                         if pontos <= 20:
                             vObstaculo += 20
                 ini.draw()
-
+                ini.update()
         # Faz a queda do inimigo abatido
         if len(inimigosAbatidos) > 0:
             for deadIni in inimigosAbatidos:
@@ -307,6 +313,7 @@ def gameplay():
                 deadIni.draw()
 
         passaro.draw()
+        passaro.update()
         for vida in vidas:
             vida.draw()
 
@@ -392,7 +399,8 @@ def gameplay():
 
 
 def menu_jogo():
-    aviao = Sprite("components/sprites/plane/Fly_1.png")
+    aviao = Sprite("components/sprites/plane/FlyAnimation.png", 2)
+    aviao.set_total_duration(10)
     aviao.x = janela.width / 2 - aviao.width / 2
     aviao.y = janela.height / 2 - aviao.height / 2
 
@@ -427,6 +435,7 @@ def menu_jogo():
         fundo.draw()
         fundo2.draw()
         aviao.draw()
+        aviao.update()
 
         # Criação das nuvens
         rNuvem += 2 * janela.delta_time()
