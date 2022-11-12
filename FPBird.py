@@ -140,16 +140,29 @@ def gameplay():
         vidas.append(vid)
 
     # Variáveis
-    vObstaculo = 500 * nivel
+    vObstaculo = 350 + 150 * nivel
     print(vObstaculo)
     vPassaro = 400
-    rload = 15
+    rBulletInimigo = 15
     click = 0
     reloadDano = 0
     tiroReload = 15
     rSpawnInimigo = 0
-    vely_ini = -100
+    vely_ini = -100 - 20*nivel
     pontos = 0
+    if nivel == 1: #Fácil
+        rBulletInimigo_TIME = 10
+    elif nivel == 2: #Médio
+        rBulletInimigo_TIME = 7
+    elif nivel == 3: #Médio
+        rBulletInimigo_TIME = 4
+    if nivel == 1: #Fácil
+        rSpawnInimigo_TIME = 14
+    elif nivel == 2: #Médio
+        rSpawnInimigo_TIME = 10
+    elif nivel == 3: #Médio
+        rSpawnInimigo_TIME = 4
+    
 
     # FPS
     tempo = 0
@@ -180,7 +193,7 @@ def gameplay():
         fundo.draw()
         fundo2.draw()
         reloadDano -= 5 * janela.delta_time()
-        rload += 9 * janela.delta_time()
+        rBulletInimigo += 9 * janela.delta_time()
         rSpawnInimigo += 9 * janela.delta_time()
 
         # Entradas
@@ -227,15 +240,14 @@ def gameplay():
 
         # Projéteis Inimigos
         # Cria
-        if rload > 10:
+        if rBulletInimigo > rBulletInimigo_TIME:
             # posx = random.randint(1,50) # Pode ser retirado com o uso do random no obj.y
             # obj = Sprite("./coisas/imagens/bola.png")
             obj = Sprite("components/sprites/bullet/Bullet_1.png")
             obj.x = janela.width + 50
-            obj.y = random.randint(0,
-                                   janela.height - obj.height)  # obj.height * posx # ??? obj.height: se diminuir o obj fica limitado a uma certa altura ??? posx: e não posy
+            obj.y = random.randint(0, janela.height - obj.height)  # obj.height * posx # ??? obj.height: se diminuir o obj fica limitado a uma certa altura ??? posx: e não posy
             objetos.append(obj)
-            rload = 0
+            rBulletInimigo = 0
         # Verifica colisão e remove
         else:
             for o in objetos:
@@ -253,7 +265,7 @@ def gameplay():
 
         # Inimigos
         # Spawn Inimigos
-        if rSpawnInimigo > 14 and len(inimigos) < 3:
+        if rSpawnInimigo > rSpawnInimigo_TIME and len(inimigos) < 2 + nivel:
             inimigo = Sprite("components/sprites/inimigo/inimigoAnimation.png", 2)
             inimigo.set_total_duration(10)
             inimigo.x = janela.width
