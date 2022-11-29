@@ -1,3 +1,4 @@
+import pygame
 from PPlay.keyboard import *
 from PPlay.sprite import *
 from PPlay.window import *
@@ -5,7 +6,56 @@ from PPlay.gameimage import *
 from PPlay.animation import *
 import random
 
+''' ### FUNÇÃO COM UTILIDADE NO GAMEPLAY ### '''
+''' Faz o efeito piscante no Sprite '''
+def efeito_piscante(sprite, cowdownInv):
+    if 5<=cowdownInv<=10 or 15<=cowdownInv<=20 or 25<=cowdownInv<=30 or 35<=cowdownInv<=40: # Gambiarra
+        sprite.hide()
+    else: 
+        sprite.unhide()
 
+''' Sorteia o Cenário '''
+def sort_scenery():
+    cenario1 = "components/background/bg1_cidade.jpg"
+    cenario2 = "components/background/bg2_colinas.jpg"
+    cenario3 = "components/background/bg3_floresta.jpg"
+    cenario4 = "components/background/bg4_rural.jpg"
+    cenario5 = "components/background/bg5_eolica.jpg"
+    cenario6 = "components/background/bg6_interior.jpg"
+    cenario7 = "components/background/bg7_municipio.jpg"
+    cenario8 = "components/background/bg8_rio.jpg"
+    cenario9 = "components/background/bg9_colinas_neve.jpg"
+    cenario10 = "components/background/bg10_totem.jpg"
+    cenario11 = "components/background/bg11_praia.jpg"
+    cenario12 = "components/background/bg12_praia_2.jpg"
+    cenarios = [cenario1, cenario2, cenario3, cenario4, cenario5, cenario6, cenario7, cenario8, cenario9, cenario10,
+                cenario11, cenario12]
+
+    scenerySorted = cenarios[random.randint(0, len(cenarios) - 1)]
+    return scenerySorted
+
+''' Lista dos Boosts '''
+def lista_boost():
+    bArmor = ["components/sprites/boost/armor.png" , 1]
+    bGold = ["components/sprites/boost/gold.png", 4]
+    bSpeed = ["components/sprites/boost/speed.png", 1]
+    bVida = ["components/sprites/boost/vida.png", 1]
+
+    lista = [bArmor, bGold, bSpeed, bVida]
+    return lista
+
+''' Faz o movimento do Cenário, fundo, background '''
+def rolamento_fundo(fundo, fundo2):
+    fundo.x -= 200 * janela.delta_time()
+    fundo2.x -= 200 * janela.delta_time()
+    if fundo.x <= 0 - fundo.width:
+        fundo.x = janela.width
+    if fundo2.x <= 0 - fundo2.width:
+        fundo2.x = janela.width
+''''''''''''''''''''''''''''''''''''''''''''''''
+
+''' ### FUNÇÕES QUE PODEM SER (FUTURAMENTE) REPRESENTADAS POR MÓDULOS ### '''
+''' Menu Principal '''
 def menu_principal():
     global rMouse
 
@@ -94,28 +144,15 @@ def menu_principal():
         if mouse_cursor.is_over_object(botao_sair) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
             janela.close()
 
-
+''' Gameplay '''
 def gameplay():
     # Cenários
-    cenario1 = "components/background/bg1_cidade.jpg"
-    cenario2 = "components/background/bg2_colinas.jpg"
-    cenario3 = "components/background/bg3_floresta.jpg"
-    cenario4 = "components/background/bg4_rural.jpg"
-    cenario5 = "components/background/bg5_eolica.jpg"
-    cenario6 = "components/background/bg6_interior.jpg"
-    cenario7 = "components/background/bg7_municipio.jpg"
-    cenario8 = "components/background/bg8_rio.jpg"
-    cenario9 = "components/background/bg9_colinas_neve.jpg"
-    cenario10 = "components/background/bg10_totem.jpg"
-    cenario11 = "components/background/bg11_praia.jpg"
-    cenario12 = "components/background/bg12_praia_2.jpg"
-    cenarios = [cenario1, cenario2, cenario3, cenario4, cenario5, cenario6, cenario7, cenario8, cenario9, cenario10,
-                cenario11, cenario12]
-    cenario = cenarios[random.randint(0, len(cenarios) - 1)]
+    ''' Sorteia o cenário e cria o fundo (1 e 2, o reverso) '''
+    cenario = sort_scenery() # Sorteia Cenário
     fundo = GameImage(cenario)
     fundo2 = GameImage(str(cenario).strip(".jpg") + "_Inverso.jpg")
     fundo2.x = janela.width
-
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     rNuvem = 7
     nuvems = []
 
@@ -125,6 +162,10 @@ def gameplay():
     vely_inimigos = []
     tiros = []
     inimigosAbatidos = []
+    listaFogo = []
+
+    boosts = lista_boost()
+    boostsAtivos = []
 
     # Sprites
     # Personagem
@@ -137,32 +178,29 @@ def gameplay():
     for i in range(0, 3):
         vid = Sprite("components/sprites/vida/vida.png")
         vid.x = vid.width * i
+        vid.y = 5
         vidas.append(vid)
 
     # Variáveis
     vObstaculo = 350 + 150 * nivel
-    print(vObstaculo)
     vPassaro = 400
     rBulletInimigo = 15
     click = 0
-    reloadDano = 0
     tiroReload = 15
     rSpawnInimigo = 0
     vely_ini = -100 - 20*nivel
-    pontos = 0
+    velx_tirosAliados = 500
+    qtd_inimigosAbatidos = 0
+    reloadInvencivel = 0
     if nivel == 1: #Fácil
         rBulletInimigo_TIME = 10
-    elif nivel == 2: #Médio
-        rBulletInimigo_TIME = 7
-    elif nivel == 3: #Médio
-        rBulletInimigo_TIME = 4
-    if nivel == 1: #Fácil
         rSpawnInimigo_TIME = 14
     elif nivel == 2: #Médio
+        rBulletInimigo_TIME = 7
         rSpawnInimigo_TIME = 10
-    elif nivel == 3: #Médio
+    elif nivel == 3: #Difícil
+        rBulletInimigo_TIME = 4
         rSpawnInimigo_TIME = 4
-    
 
     # FPS
     tempo = 0
@@ -172,27 +210,21 @@ def gameplay():
     # Gameloop
     # Enquanto houver vida. len(vidas) > 0
     while len(vidas) > 0:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         tempo += janela.delta_time()
         frames += 1
         if tempo >= 1:
             FPS = frames
             frames = 0
             tempo = 0
-
-        if teclado.key_pressed("esc"):
-            return 0
         rNuvem += 3 * janela.delta_time()
 
-        fundo.x -= 200 * janela.delta_time()
-        fundo2.x -= 200 * janela.delta_time()
-        if fundo.x <= 0 - fundo.width:
-            fundo.x = janela.width
-        if fundo2.x <= 0 - fundo2.width:
-            fundo2.x = janela.width
-
+        rolamento_fundo(fundo, fundo2) # Faz o fundo andar
         fundo.draw()
         fundo2.draw()
-        reloadDano -= 5 * janela.delta_time()
+
         rBulletInimigo += 9 * janela.delta_time()
         rSpawnInimigo += 9 * janela.delta_time()
 
@@ -233,7 +265,7 @@ def gameplay():
             tiroReload = 0
         if len(tiros) > 0:
             for t in tiros:
-                t.x += 500 * janela.delta_time()  # Velocidade dos tiros do personagem principal
+                t.x += velx_tirosAliados * janela.delta_time()  # Velocidade dos tiros do personagem principal
                 t.draw()
                 if t.x >= 1280:
                     tiros.remove(t)
@@ -251,17 +283,32 @@ def gameplay():
         # Verifica colisão e remove
         else:
             for o in objetos:
-                if passaro.collided(o) and reloadDano < 0 and len(vidas) != 0:
-                    somCrash1 = pygame.mixer.Sound(
-                        "components/audio/crash.wav")
-                    somCrash1.play()
-                    vidas.remove(vidas[len(vidas) - 1])
-                    objetos.remove(o)
-                    reloadDano = 5
                 o.x -= vObstaculo * janela.delta_time()
-                o.draw()
+                if reloadInvencivel <=0: # Para validar a colisão, caso não tenha sido atingido recentemente
+                    # Colisão com a nave
+                    if passaro.collided(o) and len(vidas) != 0:
+                        somCrash1 = pygame.mixer.Sound(
+                            "components/audio/crash.wav")
+                        somCrash1.play()
+                        vidas.remove(vidas[len(vidas) - 1])
+                        objetos.remove(o)
+
+                        #Sprite Fogos
+                        fogo = Sprite("components/sprites/plane/fire.png", 7)
+                        fogo.set_total_duration(500)
+                        #fogo.set_sequence(0, 7, loop=False) # Para tirar o loop da animação. Nem precisa, pq a gente remove o Sprite mais abaixo
+                        fogo.x = passaro.x
+                        fogo.y = passaro.y
+                        listaFogo.append(fogo)
+
+                        reloadInvencivel = 40 # Deixar invensível por um tempo, contagem mais abaixo
+                #Colisão com a parede
                 if o.x <= - o.width:
                     objetos.remove(o)
+                o.draw()
+        if reloadInvencivel > 0: # Efeito Piscante 
+            reloadInvencivel -= 25*janela.delta_time()
+            efeito_piscante(passaro, reloadInvencivel)
 
         # Inimigos
         # Spawn Inimigos
@@ -295,9 +342,30 @@ def gameplay():
 
                 for tiro in tiros:  # Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
                     if ini.collided(tiro):
+                        # Som Crash
                         somCrash2 = pygame.mixer.Sound(
                             "components/audio/crash.wav")
                         somCrash2.play()
+
+                        #Sprite Fogos
+                        fogo = Sprite("components/sprites/plane/fire.png", 7)
+                        fogo.set_total_duration(500)
+                        #fogo.set_sequence(0, 7, loop=False) # Para tirar o loop da animação. Nem precisa, pq a gente remove o Sprite mais abaixo
+                        fogo.x = ini.x
+                        fogo.y = ini.y
+                        listaFogo.append(fogo)
+
+                        #Saida do Boost
+                        if qtd_inimigosAbatidos%2 == 0:
+                            boost = boosts[random.randint(0,len(boosts)-1)]
+                            spriteBoost = Sprite(boost[0], boost[1])
+
+                            if boost[1]>1:
+                               spriteBoost.set_total_duration(250) 
+                            spriteBoost.x = ini.x
+                            spriteBoost.y = ini.y
+                            boostsAtivos.append(spriteBoost)
+
                         auxX = ini.x
                         auxY = ini.y
                         inimigos.remove(ini)
@@ -308,16 +376,49 @@ def gameplay():
                         inimigosAbatidos.append(DIni)
                         if tiro in tiros:  # isso evitar problemas se o tiro colidir 2 vezes ao mesmo tempo
                             tiros.remove(tiro)
-                        pontos += 1
-                        if pontos <= 20:
+                        qtd_inimigosAbatidos += 1
+                        if qtd_inimigosAbatidos <= 20:
                             vObstaculo += 20
-                ini.draw()
                 ini.update()
+                ini.draw()
+
+        # Saida do Fogo
+        for fogo in listaFogo:
+            fogo.x -= 200 * janela.delta_time()
+            fogo.y -= 50 * janela.delta_time()
+            fogo.update()
+            fogo.draw()
+            if fogo.curr_frame==6: #Se for o ultimo frame, remove, para não ficar em loop
+                listaFogo.remove(fogo)
+
+        # Saída do Boost
+        for boost in boostsAtivos:
+            boost.x -= vObstaculo * janela.delta_time()
+            ## Se sair da tela, remove
+            if boost.x < 0 - boost.width:
+                boostsAtivos.remove(boost)
+            ## Se colidir com o player, dê o boost e remova
+            if boost.collided(passaro):
+                '''
+                DAR O BOOST PARA O PLAYER:
+                Se for Armor -> Dá Armor
+                Se for Life -> Dá Life
+                Se for Energy -> Dá Energy
+                Se for Gold -> Dá Gold
+                '''
+                boostsAtivos.remove(boost)
+            
+            
+            if boost.total_frames > 1: # Fazer isso, pois se o total_frames for 1 (default), o .update da erro.
+                boost.update() # Importante para dar o efeito de animação há mais de um frame.
+            boost.draw()
+
+
         # Faz a queda do inimigo abatido
         if len(inimigosAbatidos) > 0:
             for deadIni in inimigosAbatidos:
                 if deadIni.x >= 1000:
-                    deadIni.x -= 100 * janela.delta_time()
+                    deadIni.x += 100 * janela.delta_time()
                 if deadIni.y < janela.height + deadIni.height:
                     deadIni.y += 500 * janela.delta_time()
                 else:
@@ -329,11 +430,13 @@ def gameplay():
         for vida in vidas:
             vida.draw()
 
-        janela.draw_text(str(pontos), 20, 20, size=40, bold=True)
+        janela.draw_text(f"Inimigos Abatidos:{qtd_inimigosAbatidos}", 3, 25, size=25, bold=True)
 
         if pygame.key.get_pressed()[pygame.K_F5]:
             janela.draw_text("FPS: {}".format(FPS), janela.width -
                              100, 0, size=16, bold=True, color=(0, 235, 12))
+        if teclado.key_pressed("esc"):
+            return 0
 
         # Se não houver mais vidas, limpa tela
         if len(vidas) == 0:
@@ -401,7 +504,7 @@ def gameplay():
             janela.update()
 
         gameOver.draw()
-        janela.draw_text("PONTUAÇÃO: {}".format(pontos), gameOver.x +
+        janela.draw_text("PONTUAÇÃO: {}".format(qtd_inimigosAbatidos), gameOver.x +
                          140, gameOver.y - 40, size=40, bold=True, color=(245, 220, 0))
         janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y +
                          gameOver.height, size=40, bold=True, color=(245, 220, 0))
@@ -409,7 +512,7 @@ def gameplay():
         if teclado.key_pressed("esc"):
             return 0
 
-
+''' Menu do Jogo '''
 def menu_jogo():
     aviao = Sprite("components/sprites/plane/FlyAnimation.png", 2)
     aviao.set_total_duration(10)
@@ -468,7 +571,7 @@ def menu_jogo():
         if teclado.key_pressed("enter"):
             return 1
 
-
+''' Dificuldade '''
 def dificuldade():
     global nivel  # Pega por referência a variável nível para ser modificada dentro e fora da função
     global rMouse
@@ -526,7 +629,7 @@ def dificuldade():
         dificil.draw()
         voltar.draw()
         janela.update()
-
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 # Inicio
 menu = 0
