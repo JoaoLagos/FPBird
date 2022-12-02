@@ -4,6 +4,7 @@ from PPlay.sprite import *
 from PPlay.window import *
 from PPlay.gameimage import *
 from PPlay.animation import *
+import ranking
 import random
 
 ''' ### FUNÇÃO COM UTILIDADE NO GAMEPLAY ### '''
@@ -36,6 +37,13 @@ def sort_scenery():
 
 ''' Lista dos Boosts '''
 def lista_boost():
+    global bArmor
+    global bGold
+    global bSpeed
+    global bVida
+
+
+
     bArmor = ["components/sprites/boost/armor.png" , 1]
     bGold = ["components/sprites/boost/gold.png", 4]
     bSpeed = ["components/sprites/boost/speed.png", 1]
@@ -84,26 +92,54 @@ def menu_principal():
     # Botão Jogar
     botao_jogar = Sprite("components/menu/botao_jogar.png")
     botao_jogar.x = janela.width / 2 - botao_jogar.width / 2
+    xJogar = botao_jogar.x
     botao_jogar.y = 300
+    yJogar = botao_jogar.y
     # Botão Dificuldade (Nível)
     botao_dificuldade = Sprite("components/menu/botao_dificuldade.png")
     botao_dificuldade.x = janela.width / 2 - botao_dificuldade.width / 2
+    xDificuldade = botao_dificuldade.x
     botao_dificuldade.y = botao_jogar.y + botao_jogar.height + 20
+    yDificuldade = botao_dificuldade.y
     # Botão Sair
     botao_sair = Sprite("components/menu/botao_sair.png")
     botao_sair.x = janela.width / 2 - botao_sair.width / 2
     botao_sair.y = botao_dificuldade.y + botao_dificuldade.height + 20
+    # "Botão" Ranking
+    botao_ranking = Sprite("components/menu/botao_ranking_Fechado.png")
+    botao_ranking.x = janela.width - botao_ranking.width - 30
+    xRanking = botao_ranking.x
+    botao_ranking.y = (botao_jogar.y + botao_jogar.height) - botao_ranking.height/2 
+    yRanking = botao_ranking.y
+    ## Logo Ranking
+    logo_ranking = Sprite("components/menu/ranking2.png")
+    logo_ranking.x = botao_ranking.x + 20
+    logo_ranking.y = botao_ranking.y - 110
+    ## Seta Ranking
+    seta_ranking = Sprite("components/menu/seta_ranking.png")
+    seta_ranking.x = botao_ranking.x + botao_ranking.width/2 - 5
+    seta_ranking.y = botao_ranking.y- seta_ranking.height - 20
+    ySetaRanking = seta_ranking.y
 
     rNuvem = 7
     nuvems = []
+    velSetaRanking = 10
     while True:
-        # Movimentação Fundo
+        # Movimentação
+        ## Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
         fundo2.x -= 50 * janela.delta_time()
         if fundo.x <= 0 - fundo.width:
             fundo.x = janela.width
         if fundo2.x <= 0 - fundo2.width:
             fundo2.x = janela.width
+        ##Movimentação Seta Ranking
+        seta_ranking.y += velSetaRanking*janela.delta_time()
+        logo_ranking.y += velSetaRanking*janela.delta_time()
+        if seta_ranking.y <= ySetaRanking:
+            velSetaRanking = abs(velSetaRanking)
+        if seta_ranking.y >= botao_ranking.y-seta_ranking.height:
+            velSetaRanking = -(velSetaRanking)
 
         fundo.draw()
         fundo2.draw()
@@ -127,23 +163,49 @@ def menu_principal():
         botao_jogar.draw()
         botao_dificuldade.draw()
         botao_sair.draw()
+        botao_ranking.draw()
+        logo_ranking.draw()
+        seta_ranking.draw()
 
         janela.update()
 
         if rMouse > 0: # Recarregamento do clique, pois senão ele pode dar double click.
             rMouse -= 10 * janela.delta_time()
         # Seleção das opções
-        if mouse_cursor.is_over_object(botao_jogar) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            rMouse = 5
-            pygame.mixer.music.unload()
-            return 1
+        #BOTÂO JOGAR
+        if mouse_cursor.is_over_object(botao_jogar):
+            botao_jogar = Sprite("components/menu/botao_jogar_UP.png")
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                rMouse = 5
+                pygame.mixer.music.unload()
+                return 1
+        else:
+            botao_jogar = Sprite("components/menu/botao_jogar.png")
+        botao_jogar.x = xJogar
+        botao_jogar.y = yJogar
+        # BOTÃO DIFICULDADE
+        if mouse_cursor.is_over_object(botao_dificuldade):
+            botao_dificuldade = Sprite("components/menu/botao_dificuldade_UP.png")
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                rMouse = 5
+                return 2
+        else:
+            botao_dificuldade = Sprite("components/menu/botao_dificuldade.png")
+        botao_dificuldade.x = xDificuldade
+        botao_dificuldade.y = yDificuldade
 
-        if mouse_cursor.is_over_object(botao_dificuldade) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            rMouse = 5
-            return 2
+        # BOTÃO SAIR
         if mouse_cursor.is_over_object(botao_sair) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
             janela.close()
-
+        # BOTÃO RANKING
+        if mouse_cursor.is_over_object(botao_ranking):
+            botao_ranking = Sprite("components/menu/botao_ranking_UP.png")
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+               ranking.start() 
+        else:
+            botao_ranking = Sprite("components/menu/botao_ranking_fechado.png")
+        botao_ranking.x = xRanking
+        botao_ranking.y = yRanking
 ''' Gameplay '''
 def gameplay():
     # Cenários
@@ -166,6 +228,7 @@ def gameplay():
 
     boosts = lista_boost()
     boostsAtivos = []
+    rBoostSpeed_ON = 0
 
     # Sprites
     # Personagem
@@ -192,6 +255,8 @@ def gameplay():
     velx_tirosAliados = 500
     qtd_inimigosAbatidos = 0
     reloadInvencivel = 0
+    invencivel_ByDano = False
+    invencivel_ByBoost = False
     if nivel == 1: #Fácil
         rBulletInimigo_TIME = 10
         rSpawnInimigo_TIME = 14
@@ -302,13 +367,32 @@ def gameplay():
                         listaFogo.append(fogo)
 
                         reloadInvencivel = 40 # Deixar invensível por um tempo, contagem mais abaixo
+                        invencivel_ByDano = True
                 #Colisão com a parede
                 if o.x <= - o.width:
                     objetos.remove(o)
                 o.draw()
-        if reloadInvencivel > 0: # Efeito Piscante 
-            reloadInvencivel -= 25*janela.delta_time()
-            efeito_piscante(passaro, reloadInvencivel)
+        
+        # Carregamento da Invencibilidade
+        if reloadInvencivel > 0:
+
+            if invencivel_ByDano:
+                reloadInvencivel -= 25*janela.delta_time()
+                efeito_piscante(passaro, reloadInvencivel) # Efeito Piscante 
+                if reloadInvencivel <= 0:
+                    invencivel_ByDano = False
+
+            elif invencivel_ByBoost:
+                reloadInvencivel -= 25*janela.delta_time()
+                if reloadInvencivel <= 0:
+                    xAux = passaro.x
+                    yAux = passaro.y
+                    passaro = Sprite("components/sprites/plane/FlyAnimation.png", 2)
+                    passaro.set_total_duration(10)
+                    passaro.x = xAux
+                    passaro.y = yAux
+
+                    invencivel_ByBoost = False
 
         # Inimigos
         # Spawn Inimigos
@@ -364,7 +448,7 @@ def gameplay():
                                spriteBoost.set_total_duration(250) 
                             spriteBoost.x = ini.x
                             spriteBoost.y = ini.y
-                            boostsAtivos.append(spriteBoost)
+                            boostsAtivos.append([spriteBoost, boost[0]])
 
                         auxX = ini.x
                         auxY = ini.y
@@ -393,12 +477,12 @@ def gameplay():
 
         # Saída do Boost
         for boost in boostsAtivos:
-            boost.x -= vObstaculo * janela.delta_time()
+            boost[0].x -= vObstaculo * janela.delta_time()
             ## Se sair da tela, remove
-            if boost.x < 0 - boost.width:
+            if boost[0].x < 0 - boost[0].width:
                 boostsAtivos.remove(boost)
             ## Se colidir com o player, dê o boost e remova
-            if boost.collided(passaro):
+            if boost[0].collided(passaro):
                 '''
                 DAR O BOOST PARA O PLAYER:
                 Se for Armor -> Dá Armor
@@ -406,13 +490,45 @@ def gameplay():
                 Se for Energy -> Dá Energy
                 Se for Gold -> Dá Gold
                 '''
+                if boost[1] == bArmor[0] and reloadInvencivel<=0: # ARMOR ### Tem que colocar reloadInvencivel<=0 para as vezes não bugar, pq se colidir com o bullet inimigo e dps pegar armor, o sprite fica travado no FlyAnimation_Armor.png
+                    xAux = passaro.x
+                    yAux = passaro.y
+                    passaro = Sprite("components/sprites/plane/FlyAnimation_Armor.png", 2)
+                    passaro.set_total_duration(10)
+                    passaro.x = xAux
+                    passaro.y = yAux
+
+                    reloadInvencivel = 40
+                    invencivel_ByBoost = True
+                if boost[1] == bGold[0]: # GOLD
+                    print("B") #### DO
+                    '''
+                    Dar Gold
+                    '''
+                if boost[1] == bSpeed[0]:
+                    rBoostSpeed_ON = 1000 * janela.delta_time()
+                if boost[1] == bVida[0]:
+                    if len(vidas)<3:
+                        vid = Sprite("components/sprites/vida/vida.png")
+                        vid.x = vid.width * (len(vidas))
+                        vid.y = 5
+                        vidas.append(vid)
+
                 boostsAtivos.remove(boost)
             
-            
-            if boost.total_frames > 1: # Fazer isso, pois se o total_frames for 1 (default), o .update da erro.
-                boost.update() # Importante para dar o efeito de animação há mais de um frame.
-            boost.draw()
+        
+            if boost[0].total_frames > 1: # Fazer isso, pois se o total_frames for 1 (default), o .update da erro.
+                boost[0].update() # Importante para dar o efeito de animação há mais de um frame.
+            boost[0].draw()
 
+        # Boost -> Validação (daqueles que ficam por um tempo, no caso da vida, é só adicionar +1, então não entra pois não há temporizador)
+        # SPEED
+        if rBoostSpeed_ON>0:
+            vPassaro = 1000
+            rBoostSpeed_ON -= 1*janela.delta_time()
+        else: 
+            vPassaro = 400
+        
 
         # Faz a queda do inimigo abatido
         if len(inimigosAbatidos) > 0:
