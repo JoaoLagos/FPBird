@@ -104,7 +104,9 @@ def menu_principal():
     # Botão Sair
     botao_sair = Sprite("components/menu/botao_sair.png")
     botao_sair.x = janela.width / 2 - botao_sair.width / 2
+    xSair = botao_sair.x
     botao_sair.y = botao_dificuldade.y + botao_dificuldade.height + 20
+    ySair = botao_sair.y
     # "Botão" Ranking
     botao_ranking = Sprite("components/menu/botao_ranking_Fechado.png")
     botao_ranking.x = janela.width - botao_ranking.width - 30
@@ -195,8 +197,14 @@ def menu_principal():
         botao_dificuldade.y = yDificuldade
 
         # BOTÃO SAIR
-        if mouse_cursor.is_over_object(botao_sair) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            janela.close()
+        if mouse_cursor.is_over_object(botao_sair):
+            botao_sair = Sprite("components/menu/botao_sair_UP.png")
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                janela.close()
+        else:
+            botao_sair = Sprite("components/menu/botao_sair.png")
+        botao_sair.x = xSair
+        botao_sair.y = ySair
         # BOTÃO RANKING
         if mouse_cursor.is_over_object(botao_ranking):
             botao_ranking = Sprite("components/menu/botao_ranking_UP.png")
@@ -229,7 +237,7 @@ def gameplay():
     boosts = lista_boost()
     boostsAtivos = []
     rBoostSpeed_ON = 0
-
+    rBoostGold_ON = 0
     # Sprites
     # Personagem
     passaro = Sprite("components/sprites/plane/FlyAnimation.png", 2)
@@ -240,9 +248,11 @@ def gameplay():
     # Vidas
     for i in range(0, 3):
         vid = Sprite("components/sprites/vida/vida.png")
-        vid.x = vid.width * i
+        vid.x = vid.width * i + 3*i +3
         vid.y = 5
         vidas.append(vid)
+    # Caixa Transparente
+    transparentBox = Sprite("components/sprites/caixa_transparente.png")
 
     # Variáveis
     vObstaculo = 350 + 150 * nivel
@@ -321,9 +331,15 @@ def gameplay():
         # Entrada dos tiros e sua movimentação
         tiroReload += 10 * janela.delta_time()
         if teclado.key_pressed("space") and tiroReload >= 5:
+            # Bullet Normal ou Bullet Boost
             somTiro = pygame.mixer.Sound("components/audio/tiro.wav")
             somTiro.play()
-            tiro = Sprite("components/sprites/bullet/Bullet_1.png")
+            if rBoostGold_ON<=0:
+                tiro = Sprite("components/sprites/bullet/Bullet_1.png")
+            else:
+                tiro = Sprite("components/sprites/bullet/Bullet_BOOST.png", 7)
+            tiro.set_total_duration(20)
+
             tiro.y = passaro.y + passaro.height / 2 - tiro.height / 2  # tiro.y = passaro.y
             tiro.x = passaro.x + tiro.width
             tiros.append(tiro)
@@ -331,6 +347,7 @@ def gameplay():
         if len(tiros) > 0:
             for t in tiros:
                 t.x += velx_tirosAliados * janela.delta_time()  # Velocidade dos tiros do personagem principal
+                t.update()
                 t.draw()
                 if t.x >= 1280:
                     tiros.remove(t)
@@ -419,7 +436,7 @@ def gameplay():
                 # Movimento dos inimigos no eixo Y
                 if inimigos[tag].y <= 0:
                     vely_inimigos[tag] = abs(vely_inimigos[tag])
-                elif ini.y >= janela.height - ini.height:
+                elif inimigos[tag].y >= janela.height - ini.height:
                     vely_inimigos[tag] = -vely_inimigos[tag]
 
                 inimigos[tag].y += vely_inimigos[tag] * janela.delta_time()
@@ -463,6 +480,7 @@ def gameplay():
                         qtd_inimigosAbatidos += 1
                         if qtd_inimigosAbatidos <= 20:
                             vObstaculo += 20
+                        break # Caso um inimigo seja atingido por 2 tiros, da bug. Com esse break resolve
                 ini.update()
                 ini.draw()
 
@@ -488,7 +506,7 @@ def gameplay():
                 Se for Armor -> Dá Armor
                 Se for Life -> Dá Life
                 Se for Energy -> Dá Energy
-                Se for Gold -> Dá Gold
+                Se for Gold -> Dá Gold ???
                 '''
                 if boost[1] == bArmor[0] and reloadInvencivel<=0: # ARMOR ### Tem que colocar reloadInvencivel<=0 para as vezes não bugar, pq se colidir com o bullet inimigo e dps pegar armor, o sprite fica travado no FlyAnimation_Armor.png
                     xAux = passaro.x
@@ -500,17 +518,14 @@ def gameplay():
 
                     reloadInvencivel = 40
                     invencivel_ByBoost = True
-                if boost[1] == bGold[0]: # GOLD
-                    print("B") #### DO
-                    '''
-                    Dar Gold
-                    '''
+                if boost[1] == bGold[0]: # AQUI É GOLD, MAS DENTRO DO GAME NÃO TEM NADA A VER. NO CASO, É UM BOOST DE MUNIÇÃO !!!MUDAR!!!
+                    rBoostGold_ON = 620 * janela.delta_time()
                 if boost[1] == bSpeed[0]:
                     rBoostSpeed_ON = 1000 * janela.delta_time()
                 if boost[1] == bVida[0]:
                     if len(vidas)<3:
                         vid = Sprite("components/sprites/vida/vida.png")
-                        vid.x = vid.width * (len(vidas))
+                        vid.x = vid.width * (len(vidas)) + 3*(len(vidas)) + 3
                         vid.y = 5
                         vidas.append(vid)
 
@@ -522,6 +537,13 @@ def gameplay():
             boost[0].draw()
 
         # Boost -> Validação (daqueles que ficam por um tempo, no caso da vida, é só adicionar +1, então não entra pois não há temporizador)
+        # GOLD
+        if rBoostGold_ON>0:
+            tiroReload += 15 * janela.delta_time()
+            rBoostGold_ON -= 1*janela.delta_time()
+            if rBoostGold_ON<=0:
+               tiroReload += 10 * janela.delta_time()    
+        
         # SPEED
         if rBoostSpeed_ON>0:
             vPassaro = 1000
@@ -541,12 +563,13 @@ def gameplay():
                     inimigosAbatidos.remove(deadIni)
                 deadIni.draw()
 
+        transparentBox.draw()
         passaro.draw()
         passaro.update()
         for vida in vidas:
             vida.draw()
 
-        janela.draw_text(f"Inimigos Abatidos:{qtd_inimigosAbatidos}", 3, 25, size=25, bold=True)
+        janela.draw_text(f"Inimigos Abatidos:{qtd_inimigosAbatidos}", 3, 30, size=25, bold=True)
 
         if pygame.key.get_pressed()[pygame.K_F5]:
             janela.draw_text("FPS: {}".format(FPS), janela.width -
