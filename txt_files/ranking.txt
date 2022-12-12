@@ -1,0 +1,6 @@
+aa 100
+ba 33
+ca 20
+de 6
+ac 2
+ddde 1

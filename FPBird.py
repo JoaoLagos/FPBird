@@ -38,18 +38,18 @@ def sort_scenery():
 ''' Lista dos Boosts '''
 def lista_boost():
     global bArmor
-    global bGold
+    global bShoot
     global bSpeed
-    global bVida
+    global bLife
 
 
 
     bArmor = ["components/sprites/boost/armor.png" , 1]
-    bGold = ["components/sprites/boost/gold.png", 4]
+    bShoot = ["components/sprites/boost/specialShoot.png", 4]
     bSpeed = ["components/sprites/boost/speed.png", 1]
-    bVida = ["components/sprites/boost/vida.png", 1]
+    bLife = ["components/sprites/boost/life.png", 4]
 
-    lista = [bArmor, bGold, bSpeed, bVida]
+    lista = [bArmor, bShoot, bSpeed, bLife]
     return lista
 
 ''' Faz o movimento do Cenário, fundo, background '''
@@ -185,6 +185,7 @@ def menu_principal():
             botao_jogar = Sprite("components/menu/botao_jogar.png")
         botao_jogar.x = xJogar
         botao_jogar.y = yJogar
+
         # BOTÃO DIFICULDADE
         if mouse_cursor.is_over_object(botao_dificuldade):
             botao_dificuldade = Sprite("components/menu/botao_dificuldade_UP.png")
@@ -205,6 +206,7 @@ def menu_principal():
             botao_sair = Sprite("components/menu/botao_sair.png")
         botao_sair.x = xSair
         botao_sair.y = ySair
+
         # BOTÃO RANKING
         if mouse_cursor.is_over_object(botao_ranking):
             botao_ranking = Sprite("components/menu/botao_ranking_UP.png")
@@ -214,6 +216,7 @@ def menu_principal():
             botao_ranking = Sprite("components/menu/botao_ranking_fechado.png")
         botao_ranking.x = xRanking
         botao_ranking.y = yRanking
+
 ''' Gameplay '''
 def gameplay():
     # Cenários
@@ -241,18 +244,18 @@ def gameplay():
     # Sprites
     # Personagem
     passaro = Sprite("components/sprites/plane/FlyAnimation.png", 2)
-    passaro.set_total_duration(10)
+    passaro.set_total_duration(140)
     
     passaro.x = 400
     passaro.y = janela.height / 2 - passaro.height / 2
     # Vidas
     for i in range(0, 3):
         vid = Sprite("components/sprites/vida/vida.png")
-        vid.x = vid.width * i + 3*i +3
-        vid.y = 5
+        vid.x = vid.width * i + 3*i +16
+        vid.y = 20
         vidas.append(vid)
     # Caixa Transparente
-    transparentBox = Sprite("components/sprites/caixa_transparente.png")
+    transparentBox = Sprite("components/sprites/caixa_transparente2.png")
 
     # Variáveis
     vObstaculo = 350 + 150 * nivel
@@ -263,19 +266,32 @@ def gameplay():
     rSpawnInimigo = 0
     vely_ini = -100 - 20*nivel
     velx_tirosAliados = 500
+    velx_laser = 500
     qtd_inimigosAbatidos = 0
     reloadInvencivel = 0
     invencivel_ByDano = False
     invencivel_ByBoost = False
+    laser_is_ON = False
+    BOSS_is_ON = False
+    collision_in_Janela_Width = False
+    pontos = 0
+    rLaser = 0
+    decaimentoPontos = 0 #Fator de divisão que aumenta com o passar do tempo, e reseta ao atingir um inimigo
     if nivel == 1: #Fácil
-        rBulletInimigo_TIME = 10
-        rSpawnInimigo_TIME = 14
-    elif nivel == 2: #Médio
         rBulletInimigo_TIME = 7
+        rSpawnInimigo_TIME = 14
+        vBoost = 600
+        resetBoost = 2
+    elif nivel == 2: #Médio
+        rBulletInimigo_TIME = 6
         rSpawnInimigo_TIME = 10
+        vBoost = 700
+        resetBoost = 2
     elif nivel == 3: #Difícil
         rBulletInimigo_TIME = 4
         rSpawnInimigo_TIME = 4
+        vBoost = 800
+        resetBoost = 2
 
     # FPS
     tempo = 0
@@ -335,7 +351,7 @@ def gameplay():
             somTiro = pygame.mixer.Sound("components/audio/tiro.wav")
             somTiro.play()
             if rBoostGold_ON<=0:
-                tiro = Sprite("components/sprites/bullet/Bullet_1.png")
+                tiro = Sprite("components/sprites/bullet/bullet.png")
             else:
                 tiro = Sprite("components/sprites/bullet/Bullet_BOOST.png", 7)
             tiro.set_total_duration(20)
@@ -357,7 +373,8 @@ def gameplay():
         if rBulletInimigo > rBulletInimigo_TIME:
             # posx = random.randint(1,50) # Pode ser retirado com o uso do random no obj.y
             # obj = Sprite("./coisas/imagens/bola.png")
-            obj = Sprite("components/sprites/bullet/Bullet_1.png")
+            obj = Sprite("components/sprites/bullet/bulletInimigoAnimation.png", 2)
+            obj.set_total_duration(20)
             obj.x = janela.width + 50
             obj.y = random.randint(0, janela.height - obj.height)  # obj.height * posx # ??? obj.height: se diminuir o obj fica limitado a uma certa altura ??? posx: e não posy
             objetos.append(obj)
@@ -388,6 +405,7 @@ def gameplay():
                 #Colisão com a parede
                 if o.x <= - o.width:
                     objetos.remove(o)
+                o.update()
                 o.draw()
         
         # Carregamento da Invencibilidade
@@ -414,12 +432,19 @@ def gameplay():
         # Inimigos
         # Spawn Inimigos
         if rSpawnInimigo > rSpawnInimigo_TIME and len(inimigos) < 2 + nivel:
-            inimigo = Sprite("components/sprites/inimigo/inimigoAnimation.png", 2)
+            if BOSS_is_ON == False:
+                inimigo = Sprite("components/sprites/inimigo/bossAnimation2.png", 2)
+                vidaBOSS = 3
+                BOSS_is_ON = True
+                isBOSS = True
+            else:
+                inimigo = Sprite("components/sprites/inimigo/InimigoAnimation.png", 2)
+                isBOSS = False
             inimigo.set_total_duration(10)
             inimigo.x = janela.width
             inimigo.y = random.randint(0, janela.height - inimigo.height)
 
-            inimigos.append(inimigo)
+            inimigos.append([inimigo, isBOSS])
             rSpawnInimigo = 0
 
         # Movimento Inimigos e Verificação de colisão com os tiros
@@ -430,19 +455,37 @@ def gameplay():
                 vely_inimigos.append(vely_ini)
 
                 # Movimento dos inimigos eixo X (entrada na tela)
-                if ini.x > 1100:
-                    ini.x -= 100 * janela.delta_time()
+                if ini[0].x > 1100:
+                    ini[0].x -= 100 * janela.delta_time()
 
                 # Movimento dos inimigos no eixo Y
-                if inimigos[tag].y <= 0:
+                if inimigos[tag][0].y <= 0:
                     vely_inimigos[tag] = abs(vely_inimigos[tag])
-                elif inimigos[tag].y >= janela.height - ini.height:
+                elif inimigos[tag][0].y >= janela.height - ini[0].height:
                     vely_inimigos[tag] = -vely_inimigos[tag]
 
-                inimigos[tag].y += vely_inimigos[tag] * janela.delta_time()
+                inimigos[tag][0].y += vely_inimigos[tag] * janela.delta_time()
 
                 for tiro in tiros:  # Se o tiro atingir um inimigo, elimina o inimigo e remove o projétil
-                    if ini.collided(tiro):
+                    if ini[0].collided(tiro):
+                        if ini[1]==True and vidaBOSS>1: # Se o inimigo for isBOSS = True
+                            vidaBOSS-=1
+                        else:
+                            if ini[1]==True: # Se o inimigo for isBOSS = True
+                                BOSS_is_ON = False
+                                DIni = Sprite(
+                                "components/sprites/inimigo/Dead_boss.png")  # Para criar um sprite DEAD no lugar do inimigo abatido
+                            else:
+                                DIni = Sprite(
+                                "components/sprites/inimigo/Dead_inimigo_2.png")  # Para criar um sprite DEAD no lugar do inimigo abatido
+                            auxX = ini[0].x
+                            auxY = ini[0].y
+                            inimigos.remove(ini)
+                            DIni.x = auxX
+                            DIni.y = auxY
+                            inimigosAbatidos.append(DIni)
+                            qtd_inimigosAbatidos += 1
+
                         # Som Crash
                         somCrash2 = pygame.mixer.Sound(
                             "components/audio/crash.wav")
@@ -452,37 +495,83 @@ def gameplay():
                         fogo = Sprite("components/sprites/plane/fire.png", 7)
                         fogo.set_total_duration(500)
                         #fogo.set_sequence(0, 7, loop=False) # Para tirar o loop da animação. Nem precisa, pq a gente remove o Sprite mais abaixo
-                        fogo.x = ini.x
-                        fogo.y = ini.y
+                        fogo.x = ini[0].x
+                        fogo.y = ini[0].y
                         listaFogo.append(fogo)
 
                         #Saida do Boost
-                        if qtd_inimigosAbatidos%2 == 0:
+                        if qtd_inimigosAbatidos%resetBoost == 0:
                             boost = boosts[random.randint(0,len(boosts)-1)]
                             spriteBoost = Sprite(boost[0], boost[1])
 
                             if boost[1]>1:
                                spriteBoost.set_total_duration(250) 
-                            spriteBoost.x = ini.x
-                            spriteBoost.y = ini.y
+                            spriteBoost.x = ini[0].x
+                            spriteBoost.y = ini[0].y
                             boostsAtivos.append([spriteBoost, boost[0]])
 
-                        auxX = ini.x
-                        auxY = ini.y
-                        inimigos.remove(ini)
-                        DIni = Sprite(
-                            "components/sprites/inimigo/Dead_inimigo_2.png")  # Para criar um sprite DEAD no lugar do inimigo abatido
-                        DIni.x = auxX
-                        DIni.y = auxY
-                        inimigosAbatidos.append(DIni)
+                        
                         if tiro in tiros:  # isso evitar problemas se o tiro colidir 2 vezes ao mesmo tempo
                             tiros.remove(tiro)
-                        qtd_inimigosAbatidos += 1
+                        
                         if qtd_inimigosAbatidos <= 20:
                             vObstaculo += 20
+
+                        pontos += int((10/decaimentoPontos)//1) #Incrementa pontos
+                        decaimentoPontos = 1 #Reseta o fator decaimentoPontos
                         break # Caso um inimigo seja atingido por 2 tiros, da bug. Com esse break resolve
-                ini.update()
-                ini.draw()
+                ini[0].update()
+                ini[0].draw()
+
+        decaimentoPontos += janela.delta_time() # Incrementa no decaimentoPontos com o passar do tempo
+
+        ## Laser
+        if qtd_inimigosAbatidos%2==0 and laser_is_ON==False:
+            laser_is_ON = True
+            laser = Sprite("components/sprites/inimigo/laser.png")
+            laser.x = janela.width
+            laser.y = random.randint(0, janela.height-laser.height)
+
+        if laser_is_ON:
+            if laser.x>=janela.width and collision_in_Janela_Width==False:
+                velx_laser = -500
+            elif laser.x<=-100:
+                if collision_in_Janela_Width==False:
+                    rLaser = 60
+                    velx_laser=0
+                    collision_in_Janela_Width = True
+                if rLaser>0:
+                    rLaser -= 20*janela.delta_time()
+                if rLaser<=0:
+                    velx_laser = abs(500)
+
+            if laser.x>=janela.width and collision_in_Janela_Width: # Quando o laser for e volta, reseta
+                velx_laser = 0
+                collision_in_Janela_Width = False
+                laser_is_ON = False
+
+            
+            laser.x += velx_laser*janela.delta_time()
+            laser.draw()
+        
+        if laser_is_ON and len(vidas)>0 and passaro.collided(laser) and (invencivel_ByDano==False and invencivel_ByBoost==False):
+            reloadInvencivel = 40 # Deixar invensível por um tempo, contagem mais abaixo
+            invencivel_ByDano = True
+            somCrash1 = pygame.mixer.Sound("components/audio/crash.wav")
+            somCrash1.play()
+            vidas.remove(vidas[len(vidas) - 1])
+
+            #Sprite Fogos
+            fogo = Sprite("components/sprites/plane/fire.png", 7)
+            fogo.set_total_duration(500)
+            #fogo.set_sequence(0, 7, loop=False) # Para tirar o loop da animação. Nem precisa, pq a gente remove o Sprite mais abaixo
+            fogo.x = passaro.x
+            fogo.y = passaro.y
+            listaFogo.append(fogo)
+
+            
+
+        
 
         # Saida do Fogo
         for fogo in listaFogo:
@@ -495,7 +584,7 @@ def gameplay():
 
         # Saída do Boost
         for boost in boostsAtivos:
-            boost[0].x -= vObstaculo * janela.delta_time()
+            boost[0].x -= vBoost * janela.delta_time()
             ## Se sair da tela, remove
             if boost[0].x < 0 - boost[0].width:
                 boostsAtivos.remove(boost)
@@ -518,15 +607,15 @@ def gameplay():
 
                     reloadInvencivel = 40
                     invencivel_ByBoost = True
-                if boost[1] == bGold[0]: # AQUI É GOLD, MAS DENTRO DO GAME NÃO TEM NADA A VER. NO CASO, É UM BOOST DE MUNIÇÃO !!!MUDAR!!!
+                if boost[1] == bShoot[0]: 
                     rBoostGold_ON = 620 * janela.delta_time()
                 if boost[1] == bSpeed[0]:
                     rBoostSpeed_ON = 1000 * janela.delta_time()
-                if boost[1] == bVida[0]:
+                if boost[1] == bLife[0]:
                     if len(vidas)<3:
                         vid = Sprite("components/sprites/vida/vida.png")
-                        vid.x = vid.width * (len(vidas)) + 3*(len(vidas)) + 3
-                        vid.y = 5
+                        vid.x = vid.width * (len(vidas)) + 3*(len(vidas)) + 16
+                        vid.y = 20
                         vidas.append(vid)
 
                 boostsAtivos.remove(boost)
@@ -563,13 +652,14 @@ def gameplay():
                     inimigosAbatidos.remove(deadIni)
                 deadIni.draw()
 
-        transparentBox.draw()
         passaro.draw()
         passaro.update()
+        transparentBox.draw()
         for vida in vidas:
             vida.draw()
 
-        janela.draw_text(f"Inimigos Abatidos:{qtd_inimigosAbatidos}", 3, 30, size=25, bold=True)
+        janela.draw_text(f"Inimigos Abatidos: {qtd_inimigosAbatidos}", 19, 70, size=19, bold=True)
+        janela.draw_text(f"Pontos: {pontos:.2f}", 19, 100, size=19, bold=True)
 
         if pygame.key.get_pressed()[pygame.K_F5]:
             janela.draw_text("FPS: {}".format(FPS), janela.width -
@@ -624,10 +714,11 @@ def gameplay():
                     nuvems.remove(nuv)
                 nuv.draw()
             for ini in inimigos:
-                ini.x -= 300 * janela.delta_time()
-                if ini.x < 0 - ini.width:
+                ini[0].x -= 300 * janela.delta_time()
+                if ini[0].x < 0 - ini[0].width:
                     inimigos.remove(ini)
-                ini.draw()
+                ini[0].update()
+                ini[0].draw()
             for tiro in tiros:
                 tiro.x -= 800 * janela.delta_time()  # 200
                 if tiro.x < 0 - tiro.width:
@@ -643,7 +734,7 @@ def gameplay():
             janela.update()
 
         gameOver.draw()
-        janela.draw_text("PONTUAÇÃO: {}".format(qtd_inimigosAbatidos), gameOver.x +
+        janela.draw_text("PONTUAÇÃO: {}".format(pontos), gameOver.x +
                          140, gameOver.y - 40, size=40, bold=True, color=(245, 220, 0))
         janela.draw_text("Pressione ESC para Recomeçar", gameOver.x, gameOver.y +
                          gameOver.height, size=40, bold=True, color=(245, 220, 0))
@@ -725,41 +816,78 @@ def dificuldade():
     # Fácil
     facil = Sprite("components/menu/dificuldade/facil.png", 1)
     facil.x = janela.width / 2 - facil.width / 2
+    xFacil = facil.x
     facil.y = 200
+    yFacil = facil.y
 
     # Médio
     medio = Sprite("components/menu/dificuldade/medio.png", 1)
     medio.x = janela.width / 2 - medio.width / 2
+    xMedio = medio.x
     medio.y = facil.y + facil.height + 20
+    yMedio = medio.y
 
     # Dificil
     dificil = Sprite("components/menu/dificuldade/dificil.png", 1)
     dificil.x = janela.width / 2 - dificil.width / 2
+    xDificil = dificil.x
     dificil.y = medio.y + medio.height + 20
-
+    yDificil = dificil.y
     # Voltar
     voltar = Sprite("components/menu/dificuldade/voltar2.png", 1)
     voltar.x = 40
+    xVoltar = voltar.x
     voltar.y = janela.height - voltar.height - 20
-
+    yVoltar = voltar.y
     while True:
         if rMouse > 0:
             rMouse -= 10 * janela.delta_time()
 
-        if mouse_cursor.is_over_object(facil) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            nivel = 1
-            rMouse = 5
-            return 0
-        if mouse_cursor.is_over_object(medio) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            nivel = 2
-            rMouse = 5
-            return 0
-        if mouse_cursor.is_over_object(dificil) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            nivel = 3
-            rMouse = 5
-            return 0
-        if mouse_cursor.is_over_object(voltar) and mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-            return 0
+        # FACIL
+        if mouse_cursor.is_over_object(facil):
+            facil = Sprite("components/menu/dificuldade/facil_UP.png", 1)
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                nivel = 1
+                rMouse = 5
+                return 0
+        else:
+            facil = Sprite("components/menu/dificuldade/facil.png", 1)
+        facil.x = xFacil
+        facil.y = yFacil
+
+        # MEDIO
+        if mouse_cursor.is_over_object(medio):
+            medio =Sprite("components/menu/dificuldade/medio_UP.png", 1)
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                nivel = 2
+                rMouse = 5
+                return 0
+        else:
+            medio =Sprite("components/menu/dificuldade/medio.png", 1)
+        medio.x = xMedio
+        medio.y = yMedio
+
+        # DIFÍCIL
+        if mouse_cursor.is_over_object(dificil):
+            dificil = Sprite("components/menu/dificuldade/dificil_UP.png", 1)
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                nivel = 3
+                rMouse = 5
+                return 0
+        else:
+            dificil = Sprite("components/menu/dificuldade/dificil.png", 1)
+        dificil.x = xDificil
+        dificil.y = yDificil
+
+        # SAIR
+        if mouse_cursor.is_over_object(voltar):
+            voltar =Sprite("components/menu/dificuldade/voltar2_UP.png", 1)
+            if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
+                return 0
+        else:
+            voltar =Sprite("components/menu/dificuldade/voltar2.png", 1)
+        voltar.x = xVoltar
+        voltar.y = yVoltar
 
         fundo.draw()
         txt_dificuldade.draw()
