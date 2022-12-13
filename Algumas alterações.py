@@ -296,17 +296,17 @@ def gameplay():
         rBulletInimigo_TIME = 7
         rSpawnInimigo_TIME = 14
         vBoost = 600
-        resetBoost = 2
+        resetBoost = 4
     elif nivel == 2:  # Médio
         rBulletInimigo_TIME = 6
         rSpawnInimigo_TIME = 10
         vBoost = 700
-        resetBoost = 2
+        resetBoost = 5
     elif nivel == 3:  # Difícil
         rBulletInimigo_TIME = 4
         rSpawnInimigo_TIME = 4
         vBoost = 800
-        resetBoost = 2
+        resetBoost = 6
 
     # FPS
     tempo = 0
@@ -501,6 +501,15 @@ def gameplay():
                             DIni.y = auxY
                             inimigosAbatidos.append(DIni)
                             qtd_inimigosAbatidos += 1
+                            # Saida do Boost
+                            if qtd_inimigosAbatidos!=0 and qtd_inimigosAbatidos % resetBoost == 0:
+                                boost = boosts[random.randint(0, len(boosts) - 1)]
+                                spriteBoost = Sprite(boost[0], boost[1])
+                                if boost[1] > 1:
+                                    spriteBoost.set_total_duration(250)
+                                spriteBoost.x = ini[0].x
+                                spriteBoost.y = ini[0].y
+                                boostsAtivos.append([spriteBoost, boost[0]])
 
                         # Som Crash
                         somCrash2 = pygame.mixer.Sound(
@@ -514,17 +523,6 @@ def gameplay():
                         fogo.x = ini[0].x
                         fogo.y = ini[0].y
                         listaFogo.append(fogo)
-
-                        # Saida do Boost
-                        if qtd_inimigosAbatidos % 4 == 0:
-                            boost = boosts[random.randint(0, len(boosts) - 1)]
-                            spriteBoost = Sprite(boost[0], boost[1])
-
-                            if boost[1] > 1:
-                                spriteBoost.set_total_duration(250)
-                            spriteBoost.x = ini[0].x
-                            spriteBoost.y = ini[0].y
-                            boostsAtivos.append([spriteBoost, boost[0]])
 
                         if tiro in tiros:  # isso evitar problemas se o tiro colidir 2 vezes ao mesmo tempo
                             tiros.remove(tiro)
@@ -576,7 +574,7 @@ def gameplay():
                     passaro.x = xAux
                     passaro.y = yAux
 
-                    reloadInvencivel = 40
+                    reloadInvencivel = 90
                     invencivel_ByBoost = True
                 if boost[1] == bShoot[0]:
                     rBoostGold_ON = 620 * janela.delta_time()

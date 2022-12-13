@@ -281,17 +281,17 @@ def gameplay():
         rBulletInimigo_TIME = 7
         rSpawnInimigo_TIME = 14
         vBoost = 600
-        resetBoost = 15
+        resetBoost = 4
     elif nivel == 2: #Médio
         rBulletInimigo_TIME = 6
         rSpawnInimigo_TIME = 10
         vBoost = 700
-        resetBoost = 10
+        resetBoost = 5
     elif nivel == 3: #Difícil
         rBulletInimigo_TIME = 4
         rSpawnInimigo_TIME = 4
         vBoost = 800
-        resetBoost = 8
+        resetBoost = 6
 
     # FPS
     tempo = 0
