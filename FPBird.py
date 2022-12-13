@@ -240,7 +240,7 @@ def gameplay():
     boosts = lista_boost()
     boostsAtivos = []
     rBoostSpeed_ON = 0
-    rBoostGold_ON = 0
+    rBoostShoot_ON = 0
     # Sprites
     # Personagem
     passaro = Sprite("components/sprites/plane/FlyAnimation.png", 2)
@@ -281,17 +281,17 @@ def gameplay():
         rBulletInimigo_TIME = 7
         rSpawnInimigo_TIME = 14
         vBoost = 600
-        resetBoost = 2
+        resetBoost = 15
     elif nivel == 2: #Médio
         rBulletInimigo_TIME = 6
         rSpawnInimigo_TIME = 10
         vBoost = 700
-        resetBoost = 2
+        resetBoost = 10
     elif nivel == 3: #Difícil
         rBulletInimigo_TIME = 4
         rSpawnInimigo_TIME = 4
         vBoost = 800
-        resetBoost = 2
+        resetBoost = 8
 
     # FPS
     tempo = 0
@@ -350,7 +350,7 @@ def gameplay():
             # Bullet Normal ou Bullet Boost
             somTiro = pygame.mixer.Sound("components/audio/tiro.wav")
             somTiro.play()
-            if rBoostGold_ON<=0:
+            if rBoostShoot_ON<=0:
                 tiro = Sprite("components/sprites/bullet/bullet.png")
             else:
                 tiro = Sprite("components/sprites/bullet/Bullet_BOOST.png", 7)
@@ -485,6 +485,16 @@ def gameplay():
                             DIni.y = auxY
                             inimigosAbatidos.append(DIni)
                             qtd_inimigosAbatidos += 1
+                            
+                            #Saida do Boost
+                            if qtd_inimigosAbatidos%resetBoost == 0:
+                                boost = boosts[random.randint(0,len(boosts)-1)]
+                                spriteBoost = Sprite(boost[0], boost[1])
+                                if boost[1]>1:
+                                    spriteBoost.set_total_duration(250) 
+                                spriteBoost.x = ini[0].x
+                                spriteBoost.y = ini[0].y
+                                boostsAtivos.append([spriteBoost, boost[0]])
 
                         # Som Crash
                         somCrash2 = pygame.mixer.Sound(
@@ -499,18 +509,6 @@ def gameplay():
                         fogo.y = ini[0].y
                         listaFogo.append(fogo)
 
-                        #Saida do Boost
-                        if qtd_inimigosAbatidos%resetBoost == 0:
-                            boost = boosts[random.randint(0,len(boosts)-1)]
-                            spriteBoost = Sprite(boost[0], boost[1])
-
-                            if boost[1]>1:
-                               spriteBoost.set_total_duration(250) 
-                            spriteBoost.x = ini[0].x
-                            spriteBoost.y = ini[0].y
-                            boostsAtivos.append([spriteBoost, boost[0]])
-
-                        
                         if tiro in tiros:  # isso evitar problemas se o tiro colidir 2 vezes ao mesmo tempo
                             tiros.remove(tiro)
                         
@@ -526,7 +524,7 @@ def gameplay():
         decaimentoPontos += janela.delta_time() # Incrementa no decaimentoPontos com o passar do tempo
 
         ## Laser
-        if qtd_inimigosAbatidos%2==0 and laser_is_ON==False:
+        if qtd_inimigosAbatidos%10==9 and laser_is_ON==False:
             laser_is_ON = True
             laser = Sprite("components/sprites/inimigo/laser.png")
             laser.x = janela.width
@@ -605,10 +603,10 @@ def gameplay():
                     passaro.x = xAux
                     passaro.y = yAux
 
-                    reloadInvencivel = 40
+                    reloadInvencivel = 90
                     invencivel_ByBoost = True
                 if boost[1] == bShoot[0]: 
-                    rBoostGold_ON = 620 * janela.delta_time()
+                    rBoostShoot_ON = 620 * janela.delta_time()
                 if boost[1] == bSpeed[0]:
                     rBoostSpeed_ON = 1000 * janela.delta_time()
                 if boost[1] == bLife[0]:
@@ -627,10 +625,10 @@ def gameplay():
 
         # Boost -> Validação (daqueles que ficam por um tempo, no caso da vida, é só adicionar +1, então não entra pois não há temporizador)
         # GOLD
-        if rBoostGold_ON>0:
+        if rBoostShoot_ON>0:
             tiroReload += 15 * janela.delta_time()
-            rBoostGold_ON -= 1*janela.delta_time()
-            if rBoostGold_ON<=0:
+            rBoostShoot_ON -= 1*janela.delta_time()
+            if rBoostShoot_ON<=0:
                tiroReload += 10 * janela.delta_time()    
         
         # SPEED
@@ -659,7 +657,7 @@ def gameplay():
             vida.draw()
 
         janela.draw_text(f"Inimigos Abatidos: {qtd_inimigosAbatidos}", 19, 70, size=19, bold=True)
-        janela.draw_text(f"Pontos: {pontos:.2f}", 19, 100, size=19, bold=True)
+        janela.draw_text(f"Pontos: {pontos:d}", 19, 100, size=19, bold=True)
 
         if pygame.key.get_pressed()[pygame.K_F5]:
             janela.draw_text("FPS: {}".format(FPS), janela.width -
