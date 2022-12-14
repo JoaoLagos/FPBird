@@ -1,4 +1,23 @@
-# <center>Projeto INFINITY FLY</center>
+<!-- CABEÇALHO --> 
+<h1 align="center">Projeto INFINITY FLY</h1>
 
-<center><img src="https://media1.giphy.com/media/0rWNTSGtCep0lRa57h/giphy.gif?cid=790b76118272adf2138bf80ac3299fd6ece5990173be31a9&rid=giphy.gif"></center>
+<!-- GIF do jogo -->
+<p align="center">
+    <img src="https://media.giphy.com/media/MAsPvc2RN77pwhBORq/giphy.gif">
+</p>
 
+<hr>
+
+<!-- Links -->
+<p>🔗 <a href="https://docs.google.com/document/d/1dKXmdiOsMmM4tHPHRdWQcQjqG-1GiCBSgd6qJpAwvjc/edit">Link do GDD</a></p>
+<p>🔗 <a href="">Link do Vídeo</a></p>
+<p>🔗 <a href="">Link do Jogo</a></p>
+
+<hr>
+
+<!-- Alunos -->
+<h3>ALUNOS:</h3>
+<ul >
+    <li> João Victor Lagos de Aguiar
+    <li> Luiz Fernando
+</ul>
