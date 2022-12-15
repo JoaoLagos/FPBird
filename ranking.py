@@ -28,7 +28,7 @@ def savePoints(pontos):
     ### Cria uma lista organizada (sem os "\n", strings) e organiza em ordem decrescente. POIS o lista = arquivoRanking.readlines() vem desorganizado. Adicionando o novo dado.
     listaNova = []
     for linha in lista:
-        linhaAppend = linha.split()
+        linhaAppend = linha.split("#")
         linhaAppend[1] = int(linhaAppend[1])
         listaNova.append(linhaAppend)
     listaNova.append([name, int(pontos)])
