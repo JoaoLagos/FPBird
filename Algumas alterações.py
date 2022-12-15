@@ -270,16 +270,13 @@ def gameplay():
     rSpawnInimigo = 0
     vely_ini = -100 - 20 * nivel
     velx_tirosAliados = 500
-    velx_laser = 500
     qtd_inimigosAbatidos = 0
     reloadInvencivel = 0
     invencivel_ByDano = False
     invencivel_ByBoost = False
-    laser_is_ON = False
     BOSS_is_ON = False
     collision_in_Janela_Width = False
     pontos = 0
-    rLaser = 0
     decaimentoPontos = 0  # Fator de divisão que aumenta com o passar do tempo, e reseta ao atingir um inimigo
     if nivel == 1:  # Fácil
         rBulletInimigo_TIME = 7
@@ -526,9 +523,6 @@ def gameplay():
                 ini[0].draw()
 
         decaimentoPontos += janela.delta_time()  # Incrementa no decaimentoPontos com o passar do tempo
-
-        ## Laser
-
 
         # Saida do Fogo
         for fogo in listaFogo:

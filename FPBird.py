@@ -214,7 +214,8 @@ def menu_principal():
         if mouse_cursor.is_over_object(botao_ranking):
             botao_ranking = Sprite("components/menu/botao_ranking_UP.png")
             if mouse_cursor.is_button_pressed(1) and rMouse <= 0:
-               ranking.start() 
+                rMouse = 5
+                ranking.start()
         else:
             botao_ranking = Sprite("components/menu/botao_ranking_fechado.png")
         botao_ranking.x = xRanking
@@ -854,7 +855,7 @@ def dificuldade():
         medio.draw()
         dificil.draw()
         voltar.draw()
-        janela.update()
+        janela.update() 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 # Inicio
