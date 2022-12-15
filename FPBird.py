@@ -127,6 +127,9 @@ def menu_principal():
     nuvems = []
     velSetaRanking = 10
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         # Movimentação
         ## Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
@@ -353,7 +356,7 @@ def gameplay():
             if rBoostShoot_ON<=0:
                 tiro = Sprite("components/sprites/bullet/bullet.png")
             else:
-                tiro = Sprite("components/sprites/bullet/Bullet_BOOST.png", 7)
+                tiro = Sprite("components/sprites/bullet/Bullet_BOOST_Animation2.png", 4)
             tiro.set_total_duration(20)
 
             tiro.y = passaro.y + passaro.height / 2 - tiro.height / 2  # tiro.y = passaro.y
@@ -681,6 +684,9 @@ def gameplay():
     passaro.x = playerX
     passaro.y = playery
     while len(vidas) == 0:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         fundo.draw()
         fundo2.draw()
         pygame.mixer.music.load("components/audio/gameover.wav")
@@ -760,6 +766,9 @@ def menu_jogo():
     nuvems = []
 
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         # Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
         fundo2.x -= 50 * janela.delta_time()
@@ -838,6 +847,9 @@ def dificuldade():
     voltar.y = janela.height - voltar.height - 20
     yVoltar = voltar.y
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+            
         if rMouse > 0:
             rMouse -= 10 * janela.delta_time()
 

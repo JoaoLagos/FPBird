@@ -8,9 +8,8 @@ import ranking
 import random
 
 ''' ### FUNÇÃO COM UTILIDADE NO GAMEPLAY ### '''
+
 ''' Faz o efeito piscante no Sprite '''
-
-
 def efeito_piscante(sprite, cowdownInv):
     if 5 <= cowdownInv <= 10 or 15 <= cowdownInv <= 20 or 25 <= cowdownInv <= 30 or 35 <= cowdownInv <= 40:  # Gambiarra
         sprite.hide()
@@ -18,8 +17,6 @@ def efeito_piscante(sprite, cowdownInv):
         sprite.unhide()
 
 ''' Sorteia o Cenário '''
-
-
 def sort_scenery():
     cenario1 = "components/background/bg1_cidade.jpg"
     cenario2 = "components/background/bg2_colinas.jpg"
@@ -39,10 +36,7 @@ def sort_scenery():
     scenerySorted = cenarios[random.randint(0, len(cenarios) - 1)]
     return scenerySorted
 
-
 ''' Lista dos Boosts '''
-
-
 def lista_boost():
     global bArmor
     global bShoot
@@ -57,10 +51,7 @@ def lista_boost():
     lista = [bArmor, bShoot, bSpeed, bLife]
     return lista
 
-
 ''' Faz o movimento do Cenário, fundo, background '''
-
-
 def rolamento_fundo(fundo, fundo2):
     fundo.x -= 200 * janela.delta_time()
     fundo2.x -= 200 * janela.delta_time()
@@ -69,13 +60,11 @@ def rolamento_fundo(fundo, fundo2):
     if fundo2.x <= 0 - fundo2.width:
         fundo2.x = janela.width
 
-
 ''''''''''''''''''''''''''''''''''''''''''''''''
 
 ''' ### FUNÇÕES QUE PODEM SER (FUTURAMENTE) REPRESENTADAS POR MÓDULOS ### '''
+
 ''' Menu Principal '''
-
-
 def menu_principal():
     global rMouse
 
@@ -139,6 +128,9 @@ def menu_principal():
     nuvems = []
     velSetaRanking = 10
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         # Movimentação
         ## Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
@@ -229,10 +221,7 @@ def menu_principal():
         botao_ranking.x = xRanking
         botao_ranking.y = yRanking
 
-
 ''' Gameplay '''
-
-
 def gameplay():
     # Cenários
     ''' Sorteia o cenário e cria o fundo (1 e 2, o reverso) '''
@@ -368,7 +357,7 @@ def gameplay():
             if rBoostGold_ON <= 0:
                 tiro = Sprite("components/sprites/bullet/bullet.png")
             else:
-                tiro = Sprite("components/sprites/bullet/Bullet_BOOST.png", 7)
+                tiro = Sprite("components/sprites/bullet/Bullet_BOOST_Animation2.png", 4)
             tiro.set_total_duration(20)
 
             tiro.y = passaro.y + passaro.height / 2 - tiro.height / 2  # tiro.y = passaro.y
@@ -650,6 +639,9 @@ def gameplay():
     passaro.x = playerX
     passaro.y = playery
     while len(vidas) == 0:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         fundo.draw()
         fundo2.draw()
         pygame.mixer.music.load("components/audio/gameover.wav")
@@ -709,10 +701,7 @@ def gameplay():
         if teclado.key_pressed("esc"):
             return 0
 
-
 ''' Menu do Jogo '''
-
-
 def menu_jogo():
     aviao = Sprite("components/sprites/plane/FlyAnimation.png", 2)
     aviao.set_total_duration(10)
@@ -732,6 +721,9 @@ def menu_jogo():
     nuvems = []
 
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+
         # Movimentação Fundo
         fundo.x -= 50 * janela.delta_time()
         fundo2.x -= 50 * janela.delta_time()
@@ -771,10 +763,7 @@ def menu_jogo():
         if teclado.key_pressed("enter"):
             return 1
 
-
 ''' Dificuldade '''
-
-
 def dificuldade():
     global nivel  # Pega por referência a variável nível para ser modificada dentro e fora da função
     global rMouse
@@ -813,6 +802,9 @@ def dificuldade():
     voltar.y = janela.height - voltar.height - 20
     yVoltar = voltar.y
     while True:
+        if pygame.key.get_pressed()[pygame.K_F11]:
+            pygame.display.toggle_fullscreen()
+            
         if rMouse > 0:
             rMouse -= 10 * janela.delta_time()
 
@@ -869,7 +861,6 @@ def dificuldade():
         dificil.draw()
         voltar.draw()
         janela.update()
-
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
