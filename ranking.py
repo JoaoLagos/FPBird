@@ -84,6 +84,11 @@ def start():
         ordenado.append(maior)
         jogadores.remove(maior)
         maior = "0#0"
+
+    arquivoRanking = open("txt_files/ranking.txt", "w")
+    for i in range(0,5):
+        arquivoRanking.write(ordenado[i]+"\n")
+    arquivoRanking.close()
     #lista = rank_archive.readlines()
 
     posicao = 0
