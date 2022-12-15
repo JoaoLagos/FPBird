@@ -269,16 +269,13 @@ def gameplay():
     rSpawnInimigo = 0
     vely_ini = -100 - 20*nivel
     velx_tirosAliados = 500
-    velx_laser = 500
     qtd_inimigosAbatidos = 0
     reloadInvencivel = 0
     invencivel_ByDano = False
     invencivel_ByBoost = False
-    laser_is_ON = False
     BOSS_is_ON = False
     collision_in_Janela_Width = False
     pontos = 0
-    rLaser = 0
     decaimentoPontos = 0 #Fator de divisão que aumenta com o passar do tempo, e reseta ao atingir um inimigo
     if nivel == 1: #Fácil
         rBulletInimigo_TIME = 7
@@ -525,54 +522,6 @@ def gameplay():
                 ini[0].draw()
 
         decaimentoPontos += janela.delta_time() # Incrementa no decaimentoPontos com o passar do tempo
-
-        ## Laser
-        if qtd_inimigosAbatidos%10==9 and laser_is_ON==False:
-            laser_is_ON = True
-            laser = Sprite("components/sprites/inimigo/laser.png")
-            laser.x = janela.width
-            laser.y = random.randint(0, janela.height-laser.height)
-
-        if laser_is_ON:
-            if laser.x>=janela.width and collision_in_Janela_Width==False:
-                velx_laser = -500
-            elif laser.x<=-100:
-                if collision_in_Janela_Width==False:
-                    rLaser = 60
-                    velx_laser=0
-                    collision_in_Janela_Width = True
-                if rLaser>0:
-                    rLaser -= 20*janela.delta_time()
-                if rLaser<=0:
-                    velx_laser = abs(500)
-
-            if laser.x>=janela.width and collision_in_Janela_Width: # Quando o laser for e volta, reseta
-                velx_laser = 0
-                collision_in_Janela_Width = False
-                laser_is_ON = False
-
-            
-            laser.x += velx_laser*janela.delta_time()
-            laser.draw()
-        
-        if laser_is_ON and len(vidas)>0 and passaro.collided(laser) and (invencivel_ByDano==False and invencivel_ByBoost==False):
-            reloadInvencivel = 40 # Deixar invensível por um tempo, contagem mais abaixo
-            invencivel_ByDano = True
-            somCrash1 = pygame.mixer.Sound("components/audio/crash.wav")
-            somCrash1.play()
-            vidas.remove(vidas[len(vidas) - 1])
-
-            #Sprite Fogos
-            fogo = Sprite("components/sprites/plane/fire.png", 7)
-            fogo.set_total_duration(500)
-            #fogo.set_sequence(0, 7, loop=False) # Para tirar o loop da animação. Nem precisa, pq a gente remove o Sprite mais abaixo
-            fogo.x = passaro.x
-            fogo.y = passaro.y
-            listaFogo.append(fogo)
-
-            
-
-        
 
         # Saida do Fogo
         for fogo in listaFogo:
@@ -849,7 +798,7 @@ def dificuldade():
     while True:
         if pygame.key.get_pressed()[pygame.K_F11]:
             pygame.display.toggle_fullscreen()
-            
+
         if rMouse > 0:
             rMouse -= 10 * janela.delta_time()
 
