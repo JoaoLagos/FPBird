@@ -19,5 +19,5 @@
 <h3>ALUNOS:</h3>
 <ul >
     <li> João Victor Lagos de Aguiar
-    <li> Luiz Fernando
+    <li> Luiz Fernando Pereira Mattos
 </ul>
