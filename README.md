@@ -10,8 +10,8 @@
 
 <!-- Links -->
 <p>🔗 <a href="https://docs.google.com/document/d/1dKXmdiOsMmM4tHPHRdWQcQjqG-1GiCBSgd6qJpAwvjc/edit">Link do GDD</a></p>
-<p>🔗 <a href="">Link do Vídeo</a></p>
-<p>🔗 <a href="">Link do Jogo</a></p>
+<p>🔗 <a href="https://www.youtube.com/watch?v=oGWz_9oobgw">Link do Vídeo</a></p>
+<p>🔗 <a href="https://luizmattos.itch.io/infinity-fly">Link do Jogo</a></p>
 
 <hr>
 
