@@ -6,19 +6,7 @@ import operator
 ''' Salva o NOME e a PONTUAÇÃO do jogador no RANKING, já organizando em ORDEM DECRESCENTE dos pontos '''
 
 
-def savePoints(pontos):
-    janela_width = 1280
-    janela_height = 720
-    janela = Window(janela_width, janela_height)
-    background = GameImage("components/background/bg2_colinas.jpg")
-    background.draw()
-    text = Sprite("txt_files/text2.png")
-    text.x = janela.width/2 - text.width/2
-    text.y = 200
-    text.draw()
-    janela.update()
-
-    name = input("Digite o nome do jogador: ")
+def savePoints(name, pontos):
 
     ### Abre o arquivo em modo LEITURA, para pegar os dados das linhas.
     arquivoRanking = open("txt_files/ranking.txt", "r")
@@ -86,7 +74,7 @@ def start():
         maior = "0#0"
 
     arquivoRanking = open("txt_files/ranking.txt", "w")
-    for i in range(0,5):
+    for i in range(len(ordenado)):
         arquivoRanking.write(ordenado[i]+"\n")
     arquivoRanking.close()
     #lista = rank_archive.readlines()
@@ -97,7 +85,7 @@ def start():
             break
 
         for rank_ID in ordenado:
-            if posicao < 5:
+            if posicao < 5 and posicao < len(ordenado):
                 ### Desenha medalhas
                 medalha = Sprite(medalhas[posicao])
                 medalha.x = listRank.x + 30
